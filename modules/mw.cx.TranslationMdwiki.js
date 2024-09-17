@@ -71,18 +71,28 @@ async function from_simple(targetLanguage, title) {
 	return simple_result;
 }
 
-async function getMedwikiHtml(title) {
-	title = "Md:" + title.replace(/\s/g, "_");
+async function getMedwikiHtml(title, tr_type) {
+	let end_point = "https://medwiki.toolforge.org";
+
+	if (tr_type === "all") {
+		// end_point = "https://mdwiki.org";
+		end_point = "https://mdwiki.wmcloud.org";
+	} else {
+		title = "Md:" + title.replace(/\s/g, "_");
+	}
 
 	// Encode forward slashes
 	// title = title.replace(/\//g, "%2F");
 	title = encodeURIComponent(title);
 
-	// const url = "rest.php/v1/page/" + title + "/with_html";
-	const url = "https://medwiki.toolforge.org/w/rest.php/v1/page/" + title + "/with_html";
+	const url = end_point + "/w/rest.php/v1/page/" + title + "/with_html";
 
 	const options = {
 		method: 'GET',
+		headers: {
+			'Content-Type': 'application/json',
+			'User-Agent': 'WikiProjectMed Translation Dashboard/1.0 (https://mdwiki.toolforge.org/; tools.mdwiki@toolforge.org)',
+		},
 		dataType: 'json'
 	};
 	let html;
@@ -141,7 +151,7 @@ function removeUnlinkedWikibase(html) {
 	return html;
 }
 
-async function get_new(title) {
+async function get_new(title, tr_type) {
 
 	const out = {
 		sourceLanguage: "mdwiki",
@@ -150,7 +160,7 @@ async function get_new(title) {
 		segmentedContent: "",
 		categories: []
 	}
-	var html = await getMedwikiHtml(title);
+	var html = await getMedwikiHtml(title, tr_type);
 
 	if (!html) {
 		console.log("getMedwikiHtml: not found");
@@ -169,14 +179,18 @@ async function get_new(title) {
 	return out;
 }
 
-async function get_html_from_mdwiki(targetLanguage, title, fetchPageUrl) {
+async function get_html_from_mdwiki(targetLanguage, title, fetchPageUrl, tr_type) {
 	const fetchParams = {
 		sourcelanguage: "mdwiki",
 		targetlanguage: targetLanguage,
-		section0: 1,
+		tr_type: tr_type,
 		title: title
 	};
-
+	if (tr_type === "all") {
+		fetchParams.all = "all";
+	} else {
+		fetchParams.section0 = 1;
+	}
 	fetchPageUrl = fetchPageUrl + "?" + $.param(fetchParams);
 
 	const options = {
@@ -198,12 +212,14 @@ async function get_html_from_mdwiki(targetLanguage, title, fetchPageUrl) {
 	return result;
 };
 
-async function fetchSourcePageContent_mdwiki(wikiPage, targetLanguage, siteMapper) {
+async function fetchSourcePageContent_mdwiki(wikiPage, targetLanguage, siteMapper, tr_type) {
 	// Manual normalisation to avoid redirects on spaces but not to break namespaces
 	var title = wikiPage.getTitle().replace(/ /g, '_');
 	title = title.replace('/', '%2F');
 	// ---
 	var get_from_simple = false;
+	// ---
+	console.log("tr_type: ", tr_type)
 	// ---
 	if (get_from_simple) {
 		var simple_result = from_simple(targetLanguage, title);
@@ -216,15 +232,16 @@ async function fetchSourcePageContent_mdwiki(wikiPage, targetLanguage, siteMappe
 
 	const new_way = true;
 
+	// if (tr_type !== "all") {
 	if (new_way || mw.user.getName() === "Mr. Ibrahem") {
-		// fetchPageUrl = "https://medwiki.toolforge.org/get_html/oo.php";
-		var resultx = await get_new(title);
+		var resultx = await get_new(title, tr_type);
 		if (resultx) {
 			return resultx;
 		}
 	};
+	// };
 
-	const result = await get_html_from_mdwiki(targetLanguage, title, fetchPageUrl);
+	const result = await get_html_from_mdwiki(targetLanguage, title, fetchPageUrl, tr_type);
 
 	return result;
 

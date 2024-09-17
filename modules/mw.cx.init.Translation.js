@@ -270,10 +270,11 @@ mw.cx.init.Translation.prototype.attachToDOM = function (veTarget) {
  * @param {mw.cx.SiteMapper} siteMapper
  * @return {Promise}
  */
+
 mw.cx.init.Translation.prototype.fetchSourcePageContent = function (wikiPage, targetLanguage, siteMapper) {
 
 	if (wikiPage.getLanguage() === "mdwiki") {
-		return mw.cx.TranslationMdwiki.fetchSourcePageContent_mdwiki(wikiPage, targetLanguage, siteMapper);
+		return mw.cx.TranslationMdwiki.fetchSourcePageContent_mdwiki(wikiPage, targetLanguage, siteMapper, this.config.tr_type);
 	}
 
 	const fetchParams = {
