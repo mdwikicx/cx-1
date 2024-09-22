@@ -233,20 +233,40 @@ mw.cx.TargetArticle.prototype.publishSuccess = function ( response, jqXHR ) {
 		if (publishResult.LinkToWikidata) {
 			console.log('LinkToWikidata: ' + JSON.stringify(publishResult.LinkToWikidata));
 		}
-		// TODO:
-		if ( this.sourceLanguage === "mdwiki" && publishResult.published_to == "local" ) {
-			const pp = {
-				user: mw.user.getName(),
-				lang: this.targetLanguage,
-				sourcetitle: this.sourceTitle,
-				title: this.getTargetTitle(),
-				campaign: this.campaign
-			};
-			var url = "https://mdwiki.toolforge.org/publish_o/index.php";
-			window.open( url + '?' + $.param( pp ), '_blank' );
-		}
+
 		this.translation.setTargetURL( targeturl );
-		return this.publishComplete( publishResult.targettitle || null );
+		var done = this.publishComplete( publishResult.targettitle || null );
+
+		// TODO:
+		if ( this.sourceLanguage === "mdwiki" ) {
+			var url;
+			var op_text;
+			if ( publishResult.published_to == "local" ) {
+				const pp = {
+					user: mw.user.getName(),
+					lang: this.targetLanguage,
+					sourcetitle: this.sourceTitle,
+					title: this.getTargetTitle(),
+					campaign: this.campaign
+				};
+				url = "https://mdwiki.toolforge.org/publish_o/index.php?" + $.param( pp );
+				op_text = "Publish to wikipedia!";
+			} else {
+				const pp = {
+					lang: this.targetLanguage,
+					title: this.getTargetTitle(),
+					save: 1
+				};
+				url = "https://mdwiki.toolforge.org/fixwikirefs.php?" + $.param( pp );
+				op_text = "Click here to Fix References!";
+
+			}
+			// window.open( url, '_blank' );
+			let op = `<a style='position: absolute;' href='${url}' target='_blank'>${op_text}</a>`
+			$('.cx-message-widget-details').append(op);
+		}
+
+		return done;
 	}
 
 	if ( publishResult && publishResult.edit && publishResult.edit.captcha ) {
