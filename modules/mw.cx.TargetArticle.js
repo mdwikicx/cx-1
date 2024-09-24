@@ -262,8 +262,10 @@ mw.cx.TargetArticle.prototype.publishSuccess = function ( response, jqXHR ) {
 
 			}
 			// window.open( url, '_blank' );
-			let op = `<a style='position: absolute;' href='${url}' target='_blank'>${op_text}</a>`
-			$('.cx-message-widget-details').append(op);
+			let link = `<a style='position: absolute;' href='${url}' target='_blank'>${op_text}</a>`
+			// let link = $('<a>').css('position', 'absolute').attr('href', url).attr('target', '_blank').text(op_text);
+
+			$('.cx-message-widget-details').append(link);
 		}
 
 		return done;
@@ -328,7 +330,16 @@ mw.cx.TargetArticle.prototype.publishFail = function ( errorCode, messageOrFailO
 	if ( data.edit.error ) {
 		if ( data.edit.error === 'noaccess' || ( data.edit.error && data.edit.error.code === 'noaccess') ) {
 			this.showPublishError(mddx,"no access_keys in Translation_Dashboard");
-			$('.cx-message-widget-message').html(mddxlink)
+			// $('.cx-message-widget-message').html(mddxlink)
+			$('.cx-message-widget-message')
+					.empty()
+					.append(
+						$('<span>').text('OAuth session expired, Please Log again to '),
+						$('<a>')
+							.attr('href', 'https://mdwiki.toolforge.org/Translation_Dashboard/auth.php?a=login')
+							.attr('target', '_blank')
+							.text('Translation Dashboard')
+					);
 			// $('.cx-message-widget-details').html("<a href='https://mdwiki.toolforge.org/Translation_Dashboard/auth.php?a=login' target='_blank'>Translation Dashboard</a>")
 			return;
 		}

@@ -348,7 +348,7 @@ class ApiContentTranslationPublish extends ApiBase {
 				'published_to' => $this->published_to
 			];
 
-			if ( isset( $saveresult['LinkToWikidata']) ) {
+			if (is_array($saveresult) && isset($saveresult['LinkToWikidata'])) {
 				$result['LinkToWikidata'] = $saveresult['LinkToWikidata'];
 			};
 
