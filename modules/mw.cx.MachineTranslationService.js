@@ -15,6 +15,9 @@ mw.cx.MachineTranslationService = function MwCxMachineTranslationService(
 	sourceLanguage, targetLanguage, siteMapper
 ) {
 	this.sourceLanguage = sourceLanguage;
+
+	// if (sourceLanguage === 'mdwiki') { this.sourceLanguage = 'en'; }
+
 	this.targetLanguage = targetLanguage;
 	this.siteMapper = siteMapper;
 
@@ -159,7 +162,31 @@ mw.cx.MachineTranslationService.prototype.fetchProvidersError = function () {
 };
 
 mw.cx.MachineTranslationService.prototype.fetchCXServerToken = function () {
-	return new mw.Api().postWithToken( 'csrf', {
+	// cxtoken
+
+	if (this.sourceLanguage === "mdwiki") {
+		var params = {
+			user: mw.user.getName(),
+			wiki: this.targetLanguage,
+			ty: "cxtoken",
+		}
+		const options = {
+			method: 'GET',
+			dataType: 'json'
+		}
+
+		var url = "https://mdwiki.toolforge.org/publish/token.php?" + $.param(params)
+
+		const result = fetch(url, options)
+			.then((response) => response.json())
+			.catch(error => {
+				console.error('Error fetching mdwiki token:', error);
+			});
+
+		return result;
+	}
+
+	return new mw.Api().postWithToken('csrf', {
 		action: 'cxtoken',
 		assert: 'user'
 	} );
