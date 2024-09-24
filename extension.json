@@ -366,7 +366,7 @@
 				"view": "//$1.wikipedia.org/wiki/$2",
 				"action": "//$1.wikipedia.org/w/index.php?title=$2",
 				"api": "//$1.wikipedia.org/w/api.php",
-				"cx": "https://cxserver.wikimedia.org/v1",
+				"cx": "http://localhost:8080/v1",
 				"cookieDomain": null,
 				"restbase": "//$1.wikipedia.org/api/rest_v1"
 			}
@@ -662,6 +662,15 @@
 				"mw.cx.util"
 			]
 		},
+		"ext.cx.articletopics": {
+			"packageFiles": [
+				"articletopics/ext.cx.articletopics.js",
+				{
+					"name": "articletopics.json",
+					"callback": "ContentTranslation\\ArticleTopicsDefinition::getTopics"
+				}
+			]
+		},
 		"mw.cx3": {
 			"class": "MediaWiki\\ResourceLoader\\CodexModule",
 			"localBasePath": "app",
@@ -684,12 +693,14 @@
 				"vuex",
 				"mediawiki.user",
 				"mw.cx.SiteMapper",
-				"mw.cx.util"
+				"mw.cx.util",
+				"ext.cx.articletopics"
 			],
 			"codexComponents": [
 				"CdxButton",
 				"CdxIcon",
-				"CdxDialog"
+				"CdxDialog",
+				"CdxInfoChip"
 			],
 			"messages": [
 				"cx-dashboard-header",
@@ -739,10 +750,13 @@
 				"sx-quick-tutorial-secondary-point-step-1",
 				"sx-quick-tutorial-secondary-point-step-2",
 				"sx-quick-tutorial-translate-button-label",
+				"cx-sx-sentence-selector-header-close-button-aria-label",
 				"cx-sx-sentence-selector-header-title",
 				"cx-sx-sentence-selector-done-button-label",
 				"cx-sx-sentence-selector-suggested-translation-title",
+				"cx-sx-sentence-selector-mt-settings-button-aria-label",
 				"cx-sx-sentence-selector-edit-translation-button-label",
+				"cx-sx-sentence-selector-previous-translation-button-aria-label",
 				"cx-sx-sentence-selector-apply-translation-button-label",
 				"cx-sx-sentence-selector-skip-translation-button-label",
 				"cx-sx-content-comparator-target-selector-full-article-title",
@@ -886,7 +900,13 @@
 				"cx-unreviewed-translation-dialog-review-translation-button-label",
 				"cx-unreviewed-translation-dialog-close-button-label",
 				"cx-unreviewed-translation-dialog-body",
-				"cx-unreviewed-translation-dialog-learn-more-link-label"
+				"cx-unreviewed-translation-dialog-learn-more-link-label",
+				"cx-sx-suggestions-filters-header",
+				"cx-sx-suggestions-filters-close-button-aria-label",
+				"cx-sx-suggestions-filters-done-button-label",
+				"cx-sx-suggestions-filter-user-edit-label",
+				"cx-sx-suggestions-filter-most-popular-label",
+				"cx-sx-suggestions-filter-default-group-label"
 			],
 			"noflip": true
 		},

@@ -1,58 +1,80 @@
 import suggestionsStoreModule from "@/store/modules/suggestions";
 import translatorStoreModule from "@/store/modules/translator";
 import appendixTitles from "@/utils/appendix/appendixTitles.json";
-import SuggestionSeedCollection from "@/wiki/cx/models/suggestionSeedCollection";
 import { createStore, useStore } from "vuex";
 import useSuggestionsFetch from "./useSuggestionsFetch";
 import { createApp } from "vue";
+import { EDITS_SUGGESTION_PROVIDER } from "@/composables/useSuggestionsFetchByEdits";
 
-const dummySeedArticles = {
-  testTitle0: {
-    References: "Referencias",
-    "See also": "Véase también",
-    Notes: "Notas",
-  },
-  testTitle1: {},
-  testTitle2: {
-    References: "Referencias",
-    "Early life": "",
-  },
-  invalidSeedTitle: {},
-};
-
-global.fetch = jest.fn((url) => {
-  const urlParams = url.replace("/suggest/sections/", "");
-  const [sourceTitle, sourceLanguage, targetLanguage] = urlParams.split("/");
-  const ok = sourceTitle !== "invalidSeedTitle";
-
-  return Promise.resolve({
-    ok,
+global.fetch = jest.fn(() =>
+  Promise.resolve({
+    ok: true,
     json: () =>
-      Promise.resolve({
-        sections: {
-          sourceLanguage,
-          targetLanguage,
-          sourceTitle,
-          targetTitle: "",
+      Promise.resolve([
+        {
+          source_title: "testTitle0",
+          target_title: "",
           present: [],
-          missing: dummySeedArticles[sourceTitle],
-          sourceSections: [],
-          targetSections: [],
+          missing: {
+            References: "Referencias",
+            "See also": "Véase también",
+            Notes: "Notas",
+          },
+          source_sections: [],
+          target_sections: [],
         },
-      }),
-  });
-});
+        {
+          source_title: "testTitle1",
+          target_title: "",
+          present: [],
+          missing: {
+            Valid1: "Valid1",
+            Valid2: "Valid2",
+          },
+          source_sections: [],
+          target_sections: [],
+        },
+        {
+          source_title: "testTitle2",
+          target_title: "",
+          present: [],
+          missing: {
+            References: "Referencias",
+            "Early life": "",
+          },
+          source_sections: [],
+          target_sections: [],
+        },
+        {
+          source_title: "testTitle3",
+          target_title: "",
+          present: [],
+          missing: {
+            Valid3: "Valid3",
+            Valid4: "Valid4",
+          },
+          source_sections: [],
+          target_sections: [],
+        },
+      ]),
+  })
+);
 
-/** @type {string[]} */
-const seeds = Object.keys(dummySeedArticles);
+jest.mock("@/composables/useSuggestionSeeds", () => () => ({
+  getSuggestionSeed: jest.fn(() => Promise.resolve("seed0")),
+}));
 
-const {
-  getSectionSuggestionsForPair,
-  findSuggestionSeedCollection,
-  getFavoriteTitlesByLanguagePair,
-} = suggestionsStoreModule.getters;
+jest.mock("vue-banana-i18n", () => ({
+  useI18n: () => ({
+    i18n: (key) => key,
+  }),
+}));
 
-const { getTranslationsForLanguagePair } = translatorStoreModule.getters;
+const { getSectionSuggestionsForPair, getFavoriteTitlesByLanguagePair } =
+  suggestionsStoreModule.getters;
+
+const { getTranslationsForLanguagePair, getTranslationsByStatus } =
+  translatorStoreModule.getters;
 
 const {
   addSectionSuggestion,
@@ -65,13 +87,6 @@ const state = {
   sectionSuggestions: [],
   appendixSectionTitles: appendixTitles,
   favorites: [],
-  suggestionSeedCollections: [
-    new SuggestionSeedCollection({
-      sourceLanguage: "en",
-      targetLanguage: "es",
-      seeds,
-    }),
-  ],
 };
 
 const testSuggestionsStoreModule = {
@@ -80,7 +95,6 @@ const testSuggestionsStoreModule = {
   getters: {
     getFavoriteTitlesByLanguagePair,
     getSectionSuggestionsForPair,
-    findSuggestionSeedCollection,
     getNumberOfSectionSuggestionsToFetch: () => () => 3,
   },
   mutations: {
@@ -97,6 +111,10 @@ const mockStore = createStore({
       state: {
         sourceLanguage: "en",
         targetLanguage: "es",
+        currentSuggestionFilters: {
+          type: EDITS_SUGGESTION_PROVIDER,
+          id: EDITS_SUGGESTION_PROVIDER,
+        },
       },
     },
     mediawiki: {
@@ -110,9 +128,12 @@ const mockStore = createStore({
       namespaced: true,
       getters: {
         getTranslationsForLanguagePair,
+        getTranslationsByStatus,
       },
       state: {
-        translations: [],
+        translations: [
+          { sourceTitle: "seed0", status: "published", sourceLanguage: "en" },
+        ],
       },
     },
   },
@@ -153,11 +174,17 @@ describe("useSuggestionsFetch composable test", () => {
       "testTitle0",
       "testTitle1",
       "testTitle2",
+      "testTitle3",
     ]);
 
     const listableSuggestions = data.store.getters[
       "suggestions/getSectionSuggestionsForPair"
     ]("en", "es");
-    expect(getSuggestionTitles(listableSuggestions)).toEqual(["testTitle2"]);
+
+    expect(getSuggestionTitles(listableSuggestions)).toEqual([
+      "testTitle1",
+      "testTitle2",
+      "testTitle3",
+    ]);
   });
 });
