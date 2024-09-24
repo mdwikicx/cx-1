@@ -1,3 +1,5 @@
+import { EDITS_SUGGESTION_PROVIDER } from "@/composables/useSuggestionsFetchByEdits";
+
 export default {
   /**@type Array */
   mtRequestsPending: [],
@@ -5,6 +7,11 @@ export default {
   currentTranslation: null,
   /** @type String */
   currentMTProvider: "",
+  /** @type {{ type: String, id: String }} */
+  currentSuggestionFilters: {
+    type: EDITS_SUGGESTION_PROVIDER,
+    id: EDITS_SUGGESTION_PROVIDER,
+  },
   /**
    * Current source language for SX application. It can be changed by using the
    * language selector. The initial value is set to "en" (could be set to any other

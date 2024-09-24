@@ -14,10 +14,8 @@
  * @param {Object} config Configuration
  */
 mw.cx.TitlePairCache = function CXTitlePairCache( config ) {
-	var sourceLanguage = config.sourceLanguage;
-	// if (sourceLanguage === 'mdwiki') { sourceLanguage = 'en'; }
 	// Call parent constructor
-	mw.cx.TitlePairCache.super.call( this, config.siteMapper.getApi( sourceLanguage ) );
+	mw.cx.TitlePairCache.super.call( this, config.siteMapper.getApi( config.sourceLanguage ) );
 	this.siteMapper = config.siteMapper;
 	this.targetLanguage = config.targetLanguage;
 	// Keys are page names, values are link data objects

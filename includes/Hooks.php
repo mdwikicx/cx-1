@@ -286,18 +286,24 @@ class Hooks implements
 	 * @param SpecialPage $page
 	 */
 	public function onSpecialContributionsBeforeMainOutput( $id, $user, $page ) {
+		$user = MediaWikiServices::getInstance()->getUserFactory()->newFromUserIdentity( $user );
+		if ( !$user->isNamed() ) {
+			return;
+		}
+
 		/** @var PreferenceHelper $preferenceHelper */
 		$preferenceHelper = MediaWikiServices::getInstance()->getService( 'ContentTranslation.PreferenceHelper' );
+
+		if ( $user->getId() !== $page->getUser()->getId() || !$preferenceHelper->isEnabledForUser( $user ) ) {
+			return;
+		}
+
 		if ( $preferenceHelper->isCXEntrypointDisabled( $user ) ) {
 			return;
 		}
 
 		if ( self::isMobileView() ) {
 			// Contribution buttons should be shown only in desktop
-			return;
-		}
-
-		if ( $user->getId() !== $page->getUser()->getId() || !$preferenceHelper->isEnabledForUser( $user ) ) {
 			return;
 		}
 

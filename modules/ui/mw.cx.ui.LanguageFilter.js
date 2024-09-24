@@ -7,11 +7,6 @@ $.uls.data.addLanguage( 'x-all', {
 	regions: [ 'WW' ],
 	autonym: mw.msg( 'cx-translation-filter-uls-all-languages' )
 } );
-$.uls.data.addLanguage( 'mdwiki', {
-	script: 'Latn',
-	regions: [ 'WW' ],
-	autonym: "MdWiki"
-} );
 
 /**
  * Language filter

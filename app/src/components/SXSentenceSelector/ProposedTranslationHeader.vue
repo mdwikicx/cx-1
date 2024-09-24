@@ -36,6 +36,7 @@ const mtOptionLabel = computed(
   <mw-col
     class="sx-sentence-selector__proposed-translation__header pt-5 shrink"
   >
+    <!--eslint-disable vue/no-v-text-v-html-on-component -->
     <mw-row class="ma-0 ps-5 pb-4">
       <mw-col
         tag="h6"
@@ -43,10 +44,14 @@ const mtOptionLabel = computed(
         class="sx-sentence-selector__proposed-translation__header-title pa-0 ma-0 pe-4"
         v-text="mtOptionLabel"
       />
+      <!--eslint-enable vue/no-v-text-v-html-on-component -->
       <mw-col shrink class="pe-5">
         <cdx-button
           class="sx-sentence-selector__proposed-translation__header-settings-button"
           weight="quiet"
+          :aria-label="
+            $i18n('cx-sx-sentence-selector-mt-settings-button-aria-label')
+          "
           @click="$emit('configure-options')"
         >
           <cdx-icon class="pa-0" :icon="cdxIconEllipsis" />
