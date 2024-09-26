@@ -114,6 +114,13 @@ class ApiContentTranslationPublish extends ApiBase
 			'campaign' => $params['campaign'],
 			'sourcetitle' => $params['sourcetitle'],
 		];
+
+		// wpCaptchaId, wpCaptchaWord
+		if (isset($params['wpCaptchaId'])) {
+			$t_Params['wpCaptchaId'] = $params['wpCaptchaId'];
+			$t_Params['wpCaptchaWord'] = $params['wpCaptchaWord'];
+		}
+
 		$mdwiki_result = post_to_target($t_Params);
 		return $mdwiki_result;
 	}
