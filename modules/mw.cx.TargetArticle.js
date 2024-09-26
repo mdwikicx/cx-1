@@ -448,7 +448,10 @@ mw.cx.TargetArticle.prototype.showErrorCaptcha = function ( apiResult ) {
 		// Based on FancyCaptcha::getFormInformation() (https://git.io/v6mml) and
 		// ext.confirmEdit.fancyCaptcha.js in the ConfirmEdit extension.
 		mw.loader.load( 'ext.confirmEdit.fancyCaptcha' );
-		this.captchaDialog.setFancyCaptcha( apiResult.url );
+
+		let wikiurl = "https://" + this.targetLanguage + ".wikipedia.org";
+		this.captchaDialog.setFancyCaptcha( wikiurl + apiResult.url );
+
 	} else if ( apiResult.type === 'simple' || apiResult.type === 'math' ) {
 		// SimpleCaptcha and MathCaptcha
 		this.captchaDialog.setCaptcha( 'captcha-create', apiResult.question, apiResult.mime );
