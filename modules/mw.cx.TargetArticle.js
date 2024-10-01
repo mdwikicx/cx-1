@@ -241,7 +241,7 @@ mw.cx.TargetArticle.prototype.publishSuccess = function (response, jqXHR) {
 
 		// TODO:
 		if (this.sourceLanguage === "mdwiki") {
-			mdwiki_link_message(this.targetLanguage, this.getTargetTitle(), qid)
+			mw.cx.TargetArticle.prototype.addMdwikiLinks(this.targetLanguage, this.getTargetTitle(), qid)
 		}
 
 		return done;
@@ -677,10 +677,10 @@ mw.cx.TargetArticle.prototype.getTags = function (hasTooMuchUnmodifiedText) {
 	return tagString;
 };
 
-function mdwiki_link_message(targetLanguage, TargetTitle, qid) {
+mw.cx.TargetArticle.prototype.addMdwikiLinks = function (targetLanguage, targetTitle, qid) {
 	const pp = {
 		lang: targetLanguage,
-		title: TargetTitle,
+		title: targetTitle,
 		save: 1
 	};
 	var url = "https://mdwiki.toolforge.org/fixwikirefs.php?" + $.param(pp);
@@ -689,7 +689,7 @@ function mdwiki_link_message(targetLanguage, TargetTitle, qid) {
 	var wdlink = "";
 	if (qid && qid != "") {
 		var target_wiki = targetLanguage + "wiki"
-		var wdurl = `https://www.wikidata.org/wiki/Special:SetSiteLink/${qid}/${target_wiki}?` + $.param({ page: TargetTitle });
+		var wdurl = `https://www.wikidata.org/wiki/Special:SetSiteLink/${qid}/${target_wiki}?` + $.param({ page: targetTitle });
 		wdlink = ` - <a href='${wdurl}' target='_blank'>Link to Wikidata</a>`
 	}
 	var html = `<div style="float:left;">${link}${wdlink}</div>`;
