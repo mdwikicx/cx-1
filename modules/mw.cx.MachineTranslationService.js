@@ -176,7 +176,7 @@ mw.cx.MachineTranslationService.prototype.cxtoken_error = function () {
 				.attr('target', '_blank')
 				.text('Translation Dashboard')
 		);
-		$('.cx-message-widget-details').html(" Then refresh the page");
+		$('.cx-message-widget-details').text(" Then refresh the page");
 
 	}, 2000)
 
@@ -201,7 +201,7 @@ mw.cx.MachineTranslationService.prototype.fetchCXServerToken = function () {
 		const result = fetch(url, options)
 			.then((response) => {
 				if (!response.ok) {
-					console.error('Error fetching mdwiki token.');
+					console.error('[CX] Error fetching mdwiki token:', response.status, response.statusText);
 					return response.json();
 				}
 				return response.json();
