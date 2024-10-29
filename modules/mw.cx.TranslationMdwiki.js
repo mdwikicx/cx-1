@@ -82,6 +82,7 @@ async function doFixIt(text) {
 
 async function from_simple(targetLanguage, title) {
 	title = encodeURIComponent(title);
+	title = title.replace('/', '%2F');
 	const simple_url = "https://cxserver.wikimedia.org/v2/page/simple/" + targetLanguage + "/User:Mr.%20Ibrahem%2F" + title;
 
 	const simple_result = await fetch(simple_url)
@@ -103,18 +104,12 @@ async function from_simple(targetLanguage, title) {
 }
 
 async function getMedwikiHtml(title, tr_type) {
-	let end_point = "https://medwiki.toolforge.org";
+	title = title.replace(/\s/g, "_");
+	let end_point;
+	({ end_point, title } = get_endpoint_and_title(tr_type, title));
 
-	if (tr_type === "all") {
-		// end_point = "https://mdwiki.org";
-		end_point = "https://mdwiki.wmcloud.org";
-	} else {
-		title = "Md:" + title.replace(/\s/g, "_");
-	}
-
-	// Encode forward slashes
-	// title = title.replace(/\//g, "%2F");
 	title = encodeURIComponent(title);
+	title = title.replace('/', '%2F');
 
 	const url = end_point + "/w/rest.php/v1/page/" + title + "/with_html";
 
@@ -145,6 +140,25 @@ async function getMedwikiHtml(title, tr_type) {
 	}
 	return html;
 }
+function get_endpoint_and_title(tr_type, title) {
+	let end_point = "https://medwiki.toolforge.org";
+
+	if (tr_type === "all") {
+		// if title contains slashes
+		if (title.includes("/")) {
+			title = title + "/fulltext";
+		} else {
+			// end_point = "https://mdwiki.wmcloud.org";
+			end_point = "https://mdwiki.org";
+		}
+	}
+
+	if (end_point == "https://medwiki.toolforge.org") {
+		title = "Md:" + title;
+	}
+	return { end_point, title };
+}
+
 function getRevision_old(HTMLText) {
 	if (HTMLText !== '') {
 		const matches = HTMLText.match(/Redirect\/revision\/(\d+)/);
@@ -246,7 +260,6 @@ async function get_html_from_mdwiki(targetLanguage, title, fetchPageUrl, tr_type
 async function fetchSourcePageContent_mdwiki_new(wikiPage, targetLanguage, siteMapper, tr_type) {
 	// Manual normalisation to avoid redirects on spaces but not to break namespaces
 	var title = wikiPage.getTitle().replace(/ /g, '_');
-	title = title.replace('/', '%2F');
 	// ---
 	var get_from_simple = false;
 	// ---
@@ -259,8 +272,6 @@ async function fetchSourcePageContent_mdwiki_new(wikiPage, targetLanguage, siteM
 		};
 	}
 
-	var fetchPageUrl = "https://medwiki.toolforge.org/get_html/index.php";
-
 	const new_way = true;
 
 	// if (tr_type !== "all") {
@@ -271,6 +282,8 @@ async function fetchSourcePageContent_mdwiki_new(wikiPage, targetLanguage, siteM
 		}
 	};
 	// };
+
+	var fetchPageUrl = "https://medwiki.toolforge.org/get_html/index.php";
 
 	const result = await get_html_from_mdwiki(targetLanguage, title, fetchPageUrl, tr_type);
 

@@ -310,12 +310,13 @@ mw.cx.TargetArticle.prototype.publishFail = function (errorCode, messageOrFailOb
 			$('.cx-message-widget-message')
 				.empty()
 				.append(
-					$('<span>').text('OAuth session expired, Please Log again to '),
+					$('<span>').text('OAuth session expired, Please Log again in '),
 					$('<a>')
 						.attr('href', 'https://mdwiki.toolforge.org/Translation_Dashboard/auth.php?a=login')
 						.attr('target', '_blank')
 						.text('Translation Dashboard')
 				);
+			$('.cx-message-widget-details').html(" Then refresh the page");
 			// $('.cx-message-widget-details').html("<a href='https://mdwiki.toolforge.org/Translation_Dashboard/auth.php?a=login' target='_blank'>Translation Dashboard</a>")
 			return;
 		}
