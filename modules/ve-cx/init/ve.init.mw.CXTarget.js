@@ -528,6 +528,15 @@ ve.init.mw.CXTarget.prototype.onSurfaceReady = function () {
 	// Get ready with the translation of first section.
 	this.prefetchTranslationForSection( 0 );
 
+	//2024
+	const sections = $('.cx-column--translation article').find('section');
+
+	for (let i = 0; i < sections.length; i++) {
+		setTimeout(() => {
+	 		this.prefetchTranslationForSection(i, true);
+	 	}, i * 1000);
+	}
+
 	if ( this.translation.hasTranslatedSections() ) {
 		this.targetSurface.$element.addClass( 've-ui-cxTargetSurface--non-empty' );
 	}
@@ -1110,11 +1119,20 @@ ve.init.mw.CXTarget.prototype.changeContentSource = function (
  *
  * @param {number} sectionNumber
  */
-ve.init.mw.CXTarget.prototype.prefetchTranslationForSection = function ( sectionNumber ) {
+ve.init.mw.CXTarget.prototype.prefetchTranslationForSection = function ( sectionNumber, set_it ) {
 	const $section = this.sourceSurface.$element.find( '#cxSourceSection' + sectionNumber );
 	if ( $section.length ) {
 		this.MTManager.getPreferredProvider().then( function ( provider ) {
 			this.translateSection( $section.prop( 'id' ), provider );
+			// auto translation
+			if (set_it) {
+				const sectionNode = this.getTargetSectionNode( $section.prop( 'id' ) );
+				this.changeContentSource(
+					sectionNode,
+					null,
+					provider
+				);
+			}
 		}.bind( this ) );
 	}
 };
