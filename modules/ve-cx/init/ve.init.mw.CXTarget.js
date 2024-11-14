@@ -531,11 +531,12 @@ ve.init.mw.CXTarget.prototype.onSurfaceReady = function () {
 	//2024
 	const sections = $('.cx-column--translation article').find('section');
 
-	for (let i = 1; i < sections.length; i++) {
+	for (let i = 0; i < sections.length; i++) {
 		setTimeout(() => {
-			this.prefetchTranslationForSection(i, true);
-		}, i * 1000);
+	 		this.prefetchTranslationForSection(i, true);
+	 	}, i * 1000);
 	}
+
 	if ( this.translation.hasTranslatedSections() ) {
 		this.targetSurface.$element.addClass( 've-ui-cxTargetSurface--non-empty' );
 	}
@@ -1122,19 +1123,15 @@ ve.init.mw.CXTarget.prototype.prefetchTranslationForSection = function ( section
 	const $section = this.sourceSurface.$element.find( '#cxSourceSection' + sectionNumber );
 	if ( $section.length ) {
 		this.MTManager.getPreferredProvider().then( function ( provider ) {
-			if (!set_it) {
-				this.translateSection( $section.prop( 'id' ), provider );
-			} else	 {
-				// TODO:
-				// هذا الجزء لا يعمل بشكل صحيح
-				/*
-					Uncaught (in promise) TypeError: Cannot read properties of undefined (reading 'getModel')
-    				at ve.init.mw.CXTarget.setSectionContent (ve.init.mw.CXTarget.js:882:40)
-				*/
-				this.translateSection( $section.prop( 'id' ), provider, false ).then( function ( content ) {
-					ve.init.mw.CXTarget.prototype.setSectionContent( $section, content, provider );
-					this.emit( 'changeContentSource', mw.cx.getSectionNumberFromSectionId( $section.prop( 'id' ) ) );
-				});
+			this.translateSection( $section.prop( 'id' ), provider );
+			// auto translation
+			if (set_it) {
+				const sectionNode = this.getTargetSectionNode( $section.prop( 'id' ) );
+				this.changeContentSource(
+					sectionNode,
+					null,
+					provider
+				);
 			}
 		}.bind( this ) );
 	}
