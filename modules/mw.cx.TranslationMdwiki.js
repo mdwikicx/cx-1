@@ -183,7 +183,7 @@ function removeUnlinkedWikibase(html) {
 		const nhtml = element.outerHTML;
 
 		// التحقق مما إذا كان HTML يحتوي على 'unlinkedwikibase'
-		if (nhtml.toLowerCase().includes('unlinkedwikibase')) {
+		if (nhtml.toLowerCase().includes('unlinkedwikibase') || nhtml.toLowerCase().includes('mdwiki revid')) {
 			// إزالة العنصر من الوثيقة
 			element.parentNode.removeChild(element);
 
@@ -224,6 +224,64 @@ async function get_new(title, tr_type) {
 	return out;
 }
 
+async function get_new_2024(title) {
+	var title = title.replace(/['" :/]/g, "_");
+
+	const out = {
+		sourceLanguage: "mdwiki",
+		title: title,
+		revision: "",
+		segmentedContent: "",
+		categories: []
+	}
+
+	const url = "https://medwiki.toolforge.org/mdtexts/segments.php?title=" + title;
+
+	const options = {
+		method: 'GET',
+		headers: {
+			'Content-Type': 'application/json',
+			'User-Agent': 'WikiProjectMed Translation Dashboard/1.0 (https://mdwiki.toolforge.org/; tools.mdwiki@toolforge.org)',
+		},
+		dataType: 'json'
+	};
+	let html;
+	try {
+		html = await fetch(url, options)
+			.then((response) => {
+				if (response.ok) {
+					return response.json();
+				}
+			})
+			.then((data) => {
+				return data.html;
+			})
+			.catch((error) => {
+				console.log(error);
+			})
+	} catch (error) {
+		console.log(error);
+	}
+	if (!html) {
+		console.log("getMedwikiHtml: not found");
+		return false;
+	};
+
+	out.revision = "";
+
+	var html2 = html.replaceAll("&#34;", '"');
+	const matches = html2.match(/Mdwiki_revid"\},"params":\{"1":\{"wt":"(\d+)"\}\}/);
+	if (matches && matches[1]) {
+		out.revision = matches[1];
+		console.log("get_new_2024 ", out.revision);
+	}
+	html = removeUnlinkedWikibase(html);
+
+	out.segmentedContent = html;
+
+	return out;
+}
+
 async function get_html_from_mdwiki(targetLanguage, title, fetchPageUrl, tr_type) {
 	const fetchParams = {
 		sourcelanguage: "mdwiki",
@@ -254,6 +312,7 @@ async function get_html_from_mdwiki(targetLanguage, title, fetchPageUrl, tr_type
 		.catch((error) => {
 			console.error("Network error: ", error);
 		});
+
 	return result;
 };
 
@@ -272,16 +331,18 @@ async function fetchSourcePageContent_mdwiki_new(wikiPage, targetLanguage, siteM
 		};
 	}
 
-	const new_way = true;
-
-	// if (tr_type !== "all") {
-	if (new_way || mw.user.getName() === "Mr. Ibrahem") {
-		var resultx = await get_new(title, tr_type);
+	/*if (mw.user.getName() === "Mr. Ibrahem" || mw.user.getName() === "Mr. Ibrahem 1") {
+		var resultx = await get_new_2024(title);
 		if (resultx) {
 			return resultx;
 		}
-	};
-	// };
+	};*/
+
+	var resultx = await get_new(title, tr_type);
+
+	if (resultx) {
+		return resultx;
+	}
 
 	var fetchPageUrl = "https://medwiki.toolforge.org/get_html/index.php";
 
