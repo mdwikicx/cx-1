@@ -267,7 +267,7 @@ async function get_new_2024(title) {
 		return false;
 	};
 
-	out.revision = "";
+	out.revision = "5200";
 
 	var html2 = html.replaceAll("&#34;", '"');
 	const matches = html2.match(/Mdwiki_revid"\},"params":\{"1":\{"wt":"(\d+)"\}\}/);
