@@ -54,10 +54,10 @@ async function postUrlParamsResult(endPoint, params = {}) {
 }
 
 async function doFixIt(text) {
-	let url = 'https://ncc2c.toolforge.org/textp';
+	let url = 'https://ncc2c.toolforge.org/HtmltoSegments';
 
 	// if (window.location.hostname === 'localhost') {
-	// 	url = 'http://localhost:8000/textp';
+	// 	url = 'http://localhost:8000/HtmltoSegments';
 	// }
 
 	const data = { html: text };
