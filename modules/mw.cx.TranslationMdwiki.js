@@ -224,6 +224,35 @@ async function get_new(title, tr_type) {
 	return out;
 }
 
+async function get_new_2025(title, tr_type) {
+
+	const fetchParams = {
+		title: title
+	};
+	if (tr_type === "all") {
+		fetchParams.all = "all";
+	}
+	var fetchPageUrl = "https://medwiki.toolforge.org/new_html/index.php?" + $.param(fetchParams);
+
+	const options = {
+		method: 'GET',
+		dataType: 'json'
+	};
+	const result = await fetch(fetchPageUrl, options)
+		.then((response) => {
+			if (!response.ok) {
+				console.error("Error fetching source page: " + response.statusText);
+				return Promise.reject(response);
+			}
+			return response.json();
+
+		})
+		.catch((error) => {
+			console.error("Network error: ", error);
+		});
+	return result;
+}
+
 async function get_new_2024(title) {
 	var title = title.replace(/['" :/]/g, "_");
 
@@ -331,17 +360,18 @@ async function fetchSourcePageContent_mdwiki_new(wikiPage, targetLanguage, siteM
 		};
 	}
 
-	/*if (mw.user.getName() === "Mr. Ibrahem" || mw.user.getName() === "Mr. Ibrahem 1") {
-		var resultx = await get_new_2024(title);
+	if (mw.user.getName() === "Mr. Ibrahem" || mw.user.getName() === "Mr. Ibrahem 1") {
+		// var resultx = await get_new_2024(title);
+		var resultx = await get_new_2025(title, tr_type);
 		if (resultx) {
 			return resultx;
 		}
-	};*/
+	};
 
-	var resultx = await get_new(title, tr_type);
+	var resultn = await get_new(title, tr_type);
 
-	if (resultx) {
-		return resultx;
+	if (resultn) {
+		return resultn;
 	}
 
 	var fetchPageUrl = "https://medwiki.toolforge.org/get_html/index.php";
