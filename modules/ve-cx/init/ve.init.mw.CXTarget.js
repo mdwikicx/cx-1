@@ -531,7 +531,7 @@ ve.init.mw.CXTarget.prototype.onSurfaceReady = function () {
 	if ( this.translation.hasTranslatedSections() ) {
 		this.targetSurface.$element.addClass( 've-ui-cxTargetSurface--non-empty' );
 	} else {
-		// Don't start auto translations if there is Translated Sections;
+		// Don't start auto translations if there are Translated Sections;
 		// By: Ibrahem Qasim
 		const sections = $('.cx-column--translation article').find('section');
 
