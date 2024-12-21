@@ -54,10 +54,10 @@ async function postUrlParamsResult(endPoint, params = {}) {
 }
 
 async function doFixIt(text) {
-	let url = 'https://ncc2c.toolforge.org/textp';
+	let url = 'https://ncc2c.toolforge.org/HtmltoSegments';
 
 	// if (window.location.hostname === 'localhost') {
-	// 	url = 'http://localhost:8000/textp';
+	// 	url = 'http://localhost:8000/HtmltoSegments';
 	// }
 
 	const data = { html: text };
@@ -78,29 +78,6 @@ async function doFixIt(text) {
 	}
 
 	return "";
-}
-
-async function from_simple(targetLanguage, title) {
-	title = encodeURIComponent(title);
-	title = title.replace('/', '%2F');
-	const simple_url = "https://cxserver.wikimedia.org/v2/page/simple/" + targetLanguage + "/User:Mr.%20Ibrahem%2F" + title;
-
-	const simple_result = await fetch(simple_url)
-		.then((response) => {
-			if (response.ok) {
-				return response.json();
-			}
-		})
-
-	if (simple_result) {
-		simple_result.sourceLanguage = "en";
-		// replace simple.wikipedia with en.wikipedia
-		simple_result.segmentedContent = simple_result.segmentedContent.replace(/simple.wikipedia/g, "en.wikipedia");
-		simple_result.segmentedContent = simple_result.segmentedContent.replace("User:Mr. Ibrahem/", "");
-		simple_result.segmentedContent = simple_result.segmentedContent.replace("Drugbox", "Infobox drug");
-
-	}
-	return simple_result;
 }
 
 async function getMedwikiHtml(title, tr_type) {
@@ -170,29 +147,21 @@ function getRevision_old(HTMLText) {
 	return "";
 }
 function removeUnlinkedWikibase(html) {
-	// إنشاء كائن DOMDocument وتحميل HTML فيه
 	const parser = new DOMParser();
 	const dom = parser.parseFromString(html, 'text/html');
 
-	// الحصول على جميع العناصر من نوع <span>
 	const elements = dom.getElementsByTagName('span');
 
-	// تحويل العناصر إلى مصفوفة للتعامل معها في حلقة
 	Array.from(elements).forEach(element => {
-		// الحصول على HTML الخاص بالعنصر
 		const nhtml = element.outerHTML;
 
-		// التحقق مما إذا كان HTML يحتوي على 'unlinkedwikibase'
-		if (nhtml.toLowerCase().includes('unlinkedwikibase')) {
-			// إزالة العنصر من الوثيقة
+		if (nhtml.toLowerCase().includes('unlinkedwikibase') || nhtml.toLowerCase().includes('mdwiki revid')) {
 			element.parentNode.removeChild(element);
 
-			// استبدال HTML في النص الأصلي
 			html = html.replace(nhtml, '');
 		}
 	});
 
-	// إعادة النص المعدل
 	return html;
 }
 
@@ -224,7 +193,96 @@ async function get_new(title, tr_type) {
 	return out;
 }
 
-async function get_html_from_mdwiki(targetLanguage, title, fetchPageUrl, tr_type) {
+async function get_new_2025(title, tr_type) {
+
+	const fetchParams = {
+		title: title
+	};
+	if (tr_type === "all") {
+		fetchParams.all = "all";
+	}
+	var fetchPageUrl = "https://medwiki.toolforge.org/new_html/index.php?" + $.param(fetchParams);
+
+	const options = {
+		method: 'GET',
+		dataType: 'json'
+	};
+	const result = await fetch(fetchPageUrl, options)
+		.then((response) => {
+			if (!response.ok) {
+				console.error("Error fetching source page: " + response.statusText);
+				return Promise.reject(response);
+			}
+			return response.json();
+
+		})
+		.catch((error) => {
+			console.error("Network error: ", error);
+		});
+	return result;
+}
+
+async function get_new_2024(title) {
+	var title = title.replace(/['" :/]/g, "_");
+
+	const out = {
+		sourceLanguage: "mdwiki",
+		title: title,
+		revision: "",
+		segmentedContent: "",
+		categories: []
+	}
+
+	const url = "https://medwiki.toolforge.org/mdtexts/segments.php?title=" + title;
+
+	const options = {
+		method: 'GET',
+		headers: {
+			'Content-Type': 'application/json',
+			'User-Agent': 'WikiProjectMed Translation Dashboard/1.0 (https://mdwiki.toolforge.org/; tools.mdwiki@toolforge.org)',
+		},
+		dataType: 'json'
+	};
+	let html;
+	try {
+		html = await fetch(url, options)
+			.then((response) => {
+				if (response.ok) {
+					return response.json();
+				}
+			})
+			.then((data) => {
+				return data.html;
+			})
+			.catch((error) => {
+				console.log(error);
+			})
+	} catch (error) {
+		console.log(error);
+	}
+	if (!html) {
+		console.log("getMedwikiHtml: not found");
+		return false;
+	};
+
+	out.revision = "5200";
+
+	var html2 = html.replaceAll("&#34;", '"');
+	const matches = html2.match(/Mdwiki_revid"\},"params":\{"1":\{"wt":"(\d+)"\}\}/);
+	if (matches && matches[1]) {
+		out.revision = matches[1];
+		console.log("get_new_2024 ", out.revision);
+	}
+	html = removeUnlinkedWikibase(html);
+
+	out.segmentedContent = html;
+
+	return out;
+}
+
+async function get_html_from_mdwiki(targetLanguage, title, tr_type) {
+	var fetchPageUrl = "https://medwiki.toolforge.org/get_html/index.php";
+
 	const fetchParams = {
 		sourcelanguage: "mdwiki",
 		targetlanguage: targetLanguage,
@@ -254,6 +312,7 @@ async function get_html_from_mdwiki(targetLanguage, title, fetchPageUrl, tr_type
 		.catch((error) => {
 			console.error("Network error: ", error);
 		});
+
 	return result;
 };
 
@@ -261,31 +320,24 @@ async function fetchSourcePageContent_mdwiki_new(wikiPage, targetLanguage, siteM
 	// Manual normalisation to avoid redirects on spaces but not to break namespaces
 	var title = wikiPage.getTitle().replace(/ /g, '_');
 	// ---
-	var get_from_simple = false;
-	// ---
 	console.log("tr_type: ", tr_type)
 	// ---
-	if (get_from_simple) {
-		var simple_result = from_simple(targetLanguage, title);
-		if (simple_result) {
-			return simple_result;
-		};
-	}
 
-	const new_way = true;
-
-	// if (tr_type !== "all") {
-	if (new_way || mw.user.getName() === "Mr. Ibrahem") {
-		var resultx = await get_new(title, tr_type);
+	if (mw.user.getName() === "Mr. Ibrahem" || mw.user.getName() === "Mr. Ibrahem 1") {
+		// var resultx = await get_new_2024(title);
+		var resultx = await get_new_2025(title, tr_type);
 		if (resultx) {
 			return resultx;
 		}
 	};
-	// };
 
-	var fetchPageUrl = "https://medwiki.toolforge.org/get_html/index.php";
+	var resultn = await get_new(title, tr_type);
 
-	const result = await get_html_from_mdwiki(targetLanguage, title, fetchPageUrl, tr_type);
+	if (resultn) {
+		return resultn;
+	}
+
+	const result = await get_html_from_mdwiki(targetLanguage, title, tr_type);
 
 	return result;
 

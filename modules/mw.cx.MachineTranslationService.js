@@ -151,6 +151,12 @@ mw.cx.MachineTranslationService.prototype.fetchProviders = function () {
 		$to: this.targetLanguage
 	});
 
+	// {"mt":["MinT","Google"]}
+	// 2024 By: Ibrahem Qasim
+	if (this.targetLanguage === "or") {
+		return $.Deferred().resolve(["Google"]);
+	}
+
 	return $.get(fetchProvidersUrl).then(function (response) {
 		return response.mt || [];
 	});
