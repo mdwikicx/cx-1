@@ -528,17 +528,18 @@ ve.init.mw.CXTarget.prototype.onSurfaceReady = function () {
 	// Get ready with the translation of first section.
 	this.prefetchTranslationForSection( 0 );
 
-	//2024
-	const sections = $('.cx-column--translation article').find('section');
-
-	for (let i = 0; i < sections.length; i++) {
-		setTimeout(() => {
-	 		this.prefetchTranslationForSection(i, true);
-	 	}, i * 1000);
-	}
-
 	if ( this.translation.hasTranslatedSections() ) {
 		this.targetSurface.$element.addClass( 've-ui-cxTargetSurface--non-empty' );
+	} else {
+		// Don't start auto translations if there is Translated Sections;
+		// By: Ibrahem Qasim
+		const sections = $('.cx-column--translation article').find('section');
+
+		for (let i = 0; i < sections.length; i++) {
+			setTimeout(() => {
+				this.prefetchTranslationForSection(i, true);
+			}, i * 1000);
+		}
 	}
 };
 

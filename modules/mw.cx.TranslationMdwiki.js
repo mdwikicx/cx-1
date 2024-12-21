@@ -322,13 +322,16 @@ async function fetchSourcePageContent_mdwiki_new(wikiPage, targetLanguage, siteM
 	// ---
 	console.log("tr_type: ", tr_type)
 	// ---
+	var use2025 = false;
 
-	if (mw.user.getName() === "Mr. Ibrahem" || mw.user.getName() === "Mr. Ibrahem 1") {
-		// var resultx = await get_new_2024(title);
-		var resultx = await get_new_2025(title, tr_type);
-		if (resultx) {
-			return resultx;
-		}
+	if (use2025) {
+		if (mw.user.getName() === "Mr. Ibrahem" || mw.user.getName() === "Mr. Ibrahem 1") {
+			// var resultx = await get_new_2024(title);
+			var resultx = await get_new_2025(title, tr_type);
+			if (resultx) {
+				return resultx;
+			}
+		};
 	};
 
 	var resultn = await get_new(title, tr_type);
