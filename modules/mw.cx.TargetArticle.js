@@ -230,18 +230,20 @@ mw.cx.TargetArticle.prototype.publishSuccess = function (response, jqXHR) {
 		if (this.sourceLanguage === "mdwiki" && publishResult.published_to != "local") {
 			targeturl = publishResult.targeturl_wiki;
 		}
-		var qid;
+		var qid = "";
+		var wd_result = "";
 		if (publishResult.LinkToWikidata) {
 			qid = publishResult.LinkToWikidata.qid;
 			console.log('LinkToWikidata: ' + JSON.stringify(publishResult.LinkToWikidata));
+			// LinkToWikidata: {"result":"success","qid":"Q474070"}
+			wd_result = publishResult.LinkToWikidata.result;
 		}
 
 		this.translation.setTargetURL(targeturl);
 		var done = this.publishComplete(publishResult.targettitle || null);
 
-		// TODO:
 		if (this.sourceLanguage === "mdwiki") {
-			mw.cx.TargetArticle.prototype.addMdwikiLinks(this.targetLanguage, this.getTargetTitle(), qid)
+			mw.cx.TargetArticle.prototype.addMdwikiLinks(this.targetLanguage, this.getTargetTitle(), qid, wd_result)
 		}
 
 		return done;
@@ -678,7 +680,7 @@ mw.cx.TargetArticle.prototype.getTags = function (hasTooMuchUnmodifiedText) {
 	return tagString;
 };
 
-mw.cx.TargetArticle.prototype.addMdwikiLinks = function (targetLanguage, targetTitle, qid) {
+mw.cx.TargetArticle.prototype.addMdwikiLinks = function (targetLanguage, targetTitle, qid, wd_result) {
 	const pp = {
 		lang: targetLanguage,
 		title: targetTitle,
@@ -688,7 +690,7 @@ mw.cx.TargetArticle.prototype.addMdwikiLinks = function (targetLanguage, targetT
 	let link = `<a href='${url}' target='_blank'>Fix References</a>`
 
 	var wdlink = "";
-	if (qid && qid != "") {
+	if (qid != "" && wd_result != "success") {
 		var target_wiki = targetLanguage + "wiki"
 		var wdurl = `https://www.wikidata.org/wiki/Special:SetSiteLink/${qid}/${target_wiki}?` + $.param({ page: targetTitle });
 		wdlink = ` - <a href='${wdurl}' target='_blank'>Link to Wikidata</a>`
