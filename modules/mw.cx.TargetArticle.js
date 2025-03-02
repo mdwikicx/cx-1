@@ -223,7 +223,6 @@ mw.cx.TargetArticle.prototype.publishSuccess = function (response, jqXHR) {
 	} else {
 		console.log(JSON.stringify(publishResult));
 	}
-
 	// {"result":"error","edit":{"error":"noaccess","username":"Mr. Ibrahem"}}
 	if (publishResult.result === 'success') {
 		var targeturl = publishResult.targeturl;
@@ -240,10 +239,15 @@ mw.cx.TargetArticle.prototype.publishSuccess = function (response, jqXHR) {
 		}
 
 		this.translation.setTargetURL(targeturl);
-		var done = this.publishComplete(publishResult.targettitle || null);
+
+		var new_title = publishResult.save_result_all.mdwiki_result.edit.title;
+		// mdwiki_result: {"warnings":{"main":{"*":"Unrecognized parameters: wpCaptchaId, wpCaptchaWord."}},"edit":{"new":"","result":"Success","pageid":9895285,"title":"مستخدم:Mr. Ibrahem/أوبلتوكسيماب","contentmodel":"wikitext","oldrevid":0,"newrevid":69736856,"newtimestamp":"2025-03-02T00:36:55Z","watched":""},"LinkToWikidata":{"error":"Cannot create link for namespace:2","nserror":"","qid":"Q7876570"}}
+
+		var done = this.publishComplete(new_title || null);
 
 		if (this.sourceLanguage === "mdwiki") {
-			mw.cx.TargetArticle.prototype.addMdwikiLinks(this.targetLanguage, this.getTargetTitle(), qid, wd_result)
+			var title2 = new_title || this.getTargetTitle()
+			mw.cx.TargetArticle.prototype.addMdwikiLinks(this.targetLanguage, title2, qid, wd_result)
 		}
 
 		return done;
