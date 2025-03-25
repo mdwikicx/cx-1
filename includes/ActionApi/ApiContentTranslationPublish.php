@@ -333,20 +333,21 @@ class ApiContentTranslationPublish extends ApiBase
 
 		$save_result_all = $this->saveWikitext($targetTitle, $wikitext, $params);
 
-		$saveresult = $save_result_all['result'];
-		$saveresult_mdwiki = $save_result_all['mdwiki_result'];
+		$saveresult = $save_result_all['result'] ?? [];
+		$saveresult_mdwiki = $save_result_all['mdwiki_result'] ?? [];
 
 		if ($params['from'] === "mdwiki") {
 			$saveresult = $saveresult_mdwiki;
 		};
 
-		$editStatus = $saveresult['edit']['result'];
+		$save_edit = $saveresult['edit'] ?? [];
+		$editStatus = $saveresult['edit']['result'] ?? [];
 
 		if ($editStatus === 'Success') {
-			if (isset($saveresult['edit']['newrevid'])) {
+			if (isset($save_edit['newrevid'])) {
 				$tags = $this->getTags($params);
 				// Add the tags post-send, after RC row insertion
-				$revId = intval($saveresult['edit']['newrevid']);
+				$revId = intval($save_edit['newrevid']);
 				DeferredUpdates::addCallableUpdate(static function () use ($revId, $tags) {
 					ChangeTags::addTags($tags, null, $revId, null);
 				});
@@ -373,8 +374,8 @@ class ApiContentTranslationPublish extends ApiBase
 			$this->translation->translation['status'] = TranslationStore::TRANSLATION_STATUS_PUBLISHED;
 			$this->translation->translation['targetURL'] = $targetURL;
 
-			if (isset($saveresult['edit']['newrevid'])) {
-				$result['newrevid'] = intval($saveresult['edit']['newrevid']);
+			if (isset($save_edit['newrevid'])) {
+				$result['newrevid'] = intval($save_edit['newrevid']);
 				$this->translation->translation['targetRevisionId'] = $result['newrevid'];
 			}
 
@@ -386,7 +387,7 @@ class ApiContentTranslationPublish extends ApiBase
 		} else {
 			$result = [
 				'result' => 'error',
-				'edit' => $saveresult['edit']
+				'edit' => $save_edit ?? []
 			];
 		}
 		$result['save_result_all'] = $save_result_all;
