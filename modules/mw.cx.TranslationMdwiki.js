@@ -342,10 +342,12 @@ async function fetchSourcePageContent_mdwiki_new(wikiPage, targetLanguage, siteM
 		// };
 	};
 
-	var resultn = await get_new(title, tr_type);
+	if (window.location.hostname === 'medwiki.toolforge.org') {
+		var resultn = await get_new(title, tr_type);
 
-	if (resultn) {
-		return resultn;
+		if (resultn) {
+			return resultn;
+		}
 	}
 
 	const result = await get_html_from_mdwiki(targetLanguage, title, tr_type);
