@@ -694,7 +694,7 @@ mw.cx.TargetArticle.prototype.addMdwikiLinks = function (targetLanguage, targetT
 	let link = `<a href='${url}' target='_blank'>Fix References</a>`
 
 	var wdlink = "";
-	if (qid != "" && wd_result != "success") {
+	if (qid != "" && qid != "undefined" && wd_result != "success") {
 		var target_wiki = targetLanguage + "wiki"
 		var wdurl = `https://www.wikidata.org/wiki/Special:SetSiteLink/${qid}/${target_wiki}?` + $.param({ page: targetTitle });
 		wdlink = ` - <a href='${wdurl}' target='_blank'>Link to Wikidata</a>`

@@ -201,7 +201,8 @@ async function get_new_2025(title, tr_type) {
 	if (tr_type === "all") {
 		fetchParams.all = "all";
 	}
-	var fetchPageUrl = "https://medwiki.toolforge.org/new_html/index.php?" + $.param(fetchParams);
+	// var fetchPageUrl = "https://medwiki.toolforge.org/new_html/index.php?" + $.param(fetchParams);
+	var fetchPageUrl = "/new_html/index.php?" + $.param(fetchParams);
 
 	const options = {
 		method: 'GET',
@@ -233,7 +234,8 @@ async function get_new_2024(title) {
 		categories: []
 	}
 
-	const url = "https://medwiki.toolforge.org/mdtexts/segments.php?title=" + title;
+	// const url = "https://medwiki.toolforge.org/mdtexts/segments.php?title=" + title;
+	const url = "/mdtexts/segments.php?title=" + title;
 
 	const options = {
 		method: 'GET',
@@ -281,7 +283,8 @@ async function get_new_2024(title) {
 }
 
 async function get_html_from_mdwiki(targetLanguage, title, tr_type) {
-	var fetchPageUrl = "https://medwiki.toolforge.org/get_html/index.php";
+	// var fetchPageUrl = "https://medwiki.toolforge.org/get_html/index.php";
+	var fetchPageUrl = "/get_html/index.php";
 
 	const fetchParams = {
 		sourcelanguage: "mdwiki",
