@@ -201,7 +201,8 @@ async function get_new_2025(title, tr_type) {
 	if (tr_type === "all") {
 		fetchParams.all = "all";
 	}
-	var fetchPageUrl = "https://medwiki.toolforge.org/new_html/index.php?" + $.param(fetchParams);
+	// var fetchPageUrl = "https://medwiki.toolforge.org/new_html/index.php?" + $.param(fetchParams);
+	var fetchPageUrl = "/new_html/index.php?" + $.param(fetchParams);
 
 	const options = {
 		method: 'GET',
@@ -233,7 +234,8 @@ async function get_new_2024(title) {
 		categories: []
 	}
 
-	const url = "https://medwiki.toolforge.org/mdtexts/segments.php?title=" + title;
+	// const url = "https://medwiki.toolforge.org/mdtexts/segments.php?title=" + title;
+	const url = "/mdtexts/segments.php?title=" + title;
 
 	const options = {
 		method: 'GET',
@@ -281,7 +283,8 @@ async function get_new_2024(title) {
 }
 
 async function get_html_from_mdwiki(targetLanguage, title, tr_type) {
-	var fetchPageUrl = "https://medwiki.toolforge.org/get_html/index.php";
+	// var fetchPageUrl = "https://medwiki.toolforge.org/get_html/index.php";
+	var fetchPageUrl = "/get_html/index.php";
 
 	const fetchParams = {
 		sourcelanguage: "mdwiki",
@@ -323,21 +326,28 @@ async function fetchSourcePageContent_mdwiki_new(wikiPage, targetLanguage, siteM
 	console.log("tr_type: ", tr_type)
 	// ---
 	var use2025 = false;
+	// ---
+	// if server == "localhost" then use2025 = false
+	if (window.location.hostname === 'mdwikicx.toolforge.org') {
+		use2025 = true;
+	}
 
 	if (use2025) {
-		if (mw.user.getName() === "Mr. Ibrahem" || mw.user.getName() === "Mr. Ibrahem 1") {
-			// var resultx = await get_new_2024(title);
-			var resultx = await get_new_2025(title, tr_type);
-			if (resultx) {
-				return resultx;
-			}
-		};
+		// if (mw.user.getName() === "Mr. Ibrahem" || mw.user.getName() === "Mr. Ibrahem 1") {
+		// var resultx = await get_new_2024(title);
+		var resultx = await get_new_2025(title, tr_type);
+		if (resultx) {
+			return resultx;
+		}
+		// };
 	};
 
-	var resultn = await get_new(title, tr_type);
+	if (window.location.hostname === 'medwiki.toolforge.org') {
+		var resultn = await get_new(title, tr_type);
 
-	if (resultn) {
-		return resultn;
+		if (resultn) {
+			return resultn;
+		}
 	}
 
 	const result = await get_html_from_mdwiki(targetLanguage, title, tr_type);

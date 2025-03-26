@@ -204,7 +204,8 @@ const fetchSegmentedContent_mdwiki = (
     section0: 1,
   };
 
-  var cxServerApiURL = "https://medwiki.toolforge.org/get_html.php";
+  // var cxServerApiURL = "https://medwiki.toolforge.org/get_html.php";
+  var cxServerApiURL = "/get_html.php";
 
   // If revision is requested, load that revision of page.
   if (revision) {
