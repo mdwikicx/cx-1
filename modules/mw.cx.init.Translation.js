@@ -274,7 +274,8 @@ mw.cx.init.Translation.prototype.attachToDOM = function (veTarget) {
 mw.cx.init.Translation.prototype.fetchSourcePageContent = function (wikiPage, targetLanguage, siteMapper) {
 
 	if (wikiPage.getLanguage() === "mdwiki") {
-		return mw.cx.TranslationMdwiki.fetchSourcePageContent_mdwiki(wikiPage, targetLanguage, siteMapper, this.config.tr_type);
+		let page_title = wikiPage.getTitle();
+		return mw.cx.TranslationMdwiki.fetchSourcePageContent_mdwiki(page_title, targetLanguage, this.config.tr_type);
 	}
 
 	const fetchParams = {

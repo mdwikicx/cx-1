@@ -306,9 +306,7 @@ async function fetchSourcePageContent_mdwiki_new(page_title, targetLanguage, tr_
 
 };
 
-async function fetchSourcePageContent_mdwiki(wikiPage, targetLanguage, siteMapper, tr_type) {
-	let page_title = wikiPage.getTitle();
-
+async function fetchSourcePageContent_mdwiki(page_title, targetLanguage, tr_type) {
 	let result = await fetchSourcePageContent_mdwiki_new(page_title, targetLanguage, tr_type);
 
 	if (result && result.segmentedContent && targetLanguage == "sw") {
