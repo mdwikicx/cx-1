@@ -108,11 +108,11 @@ async function HtmltoSegments(text) {
 }
 
 async function getMedwikiHtml(title, tr_type) {
-	title = title.replaceAll(/\s/g, "_");
+	title = title.replace(/\s/g, "_");
 	let end_point;
 	({ end_point, title } = get_endpoint_and_title(tr_type, title));
 
-	let newTitle = encodeURIComponent(title).replaceAll(/\//g, '%2F');
+	let newTitle = encodeURIComponent(title).replace(/\//g, '%2F');
 
 	const url = `${end_point}/w/rest.php/v1/page/${newTitle}/with_html`;
 	const data = await fetchGetJson(url);
@@ -162,7 +162,7 @@ function removeUnlinkedWikibase(html) {
 		if (nhtml.toLowerCase().includes('unlinkedwikibase') || nhtml.toLowerCase().includes('mdwiki revid')) {
 			element.parentNode.removeChild(element);
 
-			html = html.replaceAll(nhtml, '');
+			html = html.replace(nhtml, '');
 		}
 	});
 
@@ -213,7 +213,7 @@ async function get_new_html_2025(title, tr_type) {
 }
 
 async function get_mdtexts_2024(title) {
-	let sanitizedTitle = title.replaceAll(/['" :/]/g, "_");
+	let sanitizedTitle = title.replace(/['" :/]/g, "_");
 
 	// const url = "https://medwiki.toolforge.org/mdtexts/segments.php?title=" + sanitizedTitle;
 	const url = `/mdtexts/segments.php?title=${sanitizedTitle}`;
@@ -269,9 +269,9 @@ async function get_Segments_from_mdwiki(targetLanguage, title, tr_type) {
 	return result;
 };
 
-async function fetchSourcePageContent_mdwiki_new(page_title, targetLanguage, tr_type) {
+async function fetchSourcePageContent_mdwiki_new(page_title, targetLanguage, tr_type, user_name) {
 	// Manual normalisation to avoid redirects on spaces but not to break namespaces
-	let title = page_title.replaceAll(/ /g, '_');
+	let title = page_title.replace(/ /g, '_');
 	// ---
 	console.log("tr_type: ", tr_type)
 	// ---
@@ -283,7 +283,7 @@ async function fetchSourcePageContent_mdwiki_new(page_title, targetLanguage, tr_
 	}
 
 	if (use2025) {
-		// if (mw.user.getName() === "Mr. Ibrahem" || mw.user.getName() === "Mr. Ibrahem 1") {
+		// if (user_name === "Mr. Ibrahem" || user_name === "Mr. Ibrahem 1") {
 		// var resultx = await get_mdtexts_2024(title);
 		var resultx = await get_new_html_2025(title, tr_type);
 		if (resultx) {
@@ -306,8 +306,8 @@ async function fetchSourcePageContent_mdwiki_new(page_title, targetLanguage, tr_
 
 };
 
-async function fetchSourcePageContent_mdwiki(page_title, targetLanguage, tr_type) {
-	let result = await fetchSourcePageContent_mdwiki_new(page_title, targetLanguage, tr_type);
+async function fetchSourcePageContent_mdwiki(page_title, targetLanguage, tr_type, user_name) {
+	let result = await fetchSourcePageContent_mdwiki_new(page_title, targetLanguage, tr_type, user_name);
 
 	if (result && result.segmentedContent && targetLanguage == "sw") {
 		let categories = add_sw_categories(result.segmentedContent);

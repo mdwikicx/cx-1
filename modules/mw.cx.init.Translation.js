@@ -275,7 +275,9 @@ mw.cx.init.Translation.prototype.fetchSourcePageContent = function (wikiPage, ta
 
 	if (wikiPage.getLanguage() === "mdwiki") {
 		let page_title = wikiPage.getTitle();
-		return mw.cx.TranslationMdwiki.fetchSourcePageContent_mdwiki(page_title, targetLanguage, this.config.tr_type);
+		let user_name = mw.user.getName();
+		let tr_type = this.config.tr_type;
+		return mw.cx.TranslationMdwiki.fetchSourcePageContent_mdwiki(page_title, targetLanguage, tr_type, user_name);
 	}
 
 	const fetchParams = {
