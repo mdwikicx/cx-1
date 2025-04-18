@@ -213,10 +213,10 @@ async function get_new_html_2025(title, tr_type) {
 }
 
 async function get_mdtexts_2024(title) {
-	var title = title.replaceAll(/['" :/]/g, "_");
+	let sanitizedTitle = title.replaceAll(/['" :/]/g, "_");
 
-	// const url = "https://medwiki.toolforge.org/mdtexts/segments.php?title=" + title;
-	const url = `/mdtexts/segments.php?title=${title}`;
+	// const url = "https://medwiki.toolforge.org/mdtexts/segments.php?title=" + sanitizedTitle;
+	const url = `/mdtexts/segments.php?title=${sanitizedTitle}`;
 
 	const data = await fetchGetJson(url);
 	if (!data) {
@@ -226,7 +226,7 @@ async function get_mdtexts_2024(title) {
 
 	const out = {
 		sourceLanguage: "mdwiki",
-		title: title,
+		title: sanitizedTitle,
 		revision: "5200",
 		segmentedContent: "",
 		categories: []
@@ -269,9 +269,9 @@ async function get_Segments_from_mdwiki(targetLanguage, title, tr_type) {
 	return result;
 };
 
-async function fetchSourcePageContent_mdwiki_new(wikiPage, targetLanguage, tr_type) {
+async function fetchSourcePageContent_mdwiki_new(page_title, targetLanguage, tr_type) {
 	// Manual normalisation to avoid redirects on spaces but not to break namespaces
-	var title = wikiPage.getTitle().replaceAll(/ /g, '_');
+	let title = page_title.replaceAll(/ /g, '_');
 	// ---
 	console.log("tr_type: ", tr_type)
 	// ---
@@ -307,8 +307,9 @@ async function fetchSourcePageContent_mdwiki_new(wikiPage, targetLanguage, tr_ty
 };
 
 async function fetchSourcePageContent_mdwiki(wikiPage, targetLanguage, siteMapper, tr_type) {
+	let page_title = wikiPage.getTitle();
 
-	let result = await fetchSourcePageContent_mdwiki_new(wikiPage, targetLanguage, tr_type);
+	let result = await fetchSourcePageContent_mdwiki_new(page_title, targetLanguage, tr_type);
 
 	if (result && result.segmentedContent && targetLanguage == "sw") {
 		let categories = add_sw_categories(result.segmentedContent);
