@@ -108,11 +108,11 @@ async function HtmltoSegments(text) {
 }
 
 async function getMedwikiHtml(title, tr_type) {
-	title = title.replace(/\s/g, "_");
+	title = title.replaceAll(/\s/g, "_");
 	let end_point;
 	({ end_point, title } = get_endpoint_and_title(tr_type, title));
 
-	let newTitle = encodeURIComponent(title).replace('/', '%2F');
+	let newTitle = encodeURIComponent(title).replaceAll(/\//g, '%2F');
 
 	const url = `${end_point}/w/rest.php/v1/page/${newTitle}/with_html`;
 	const data = await fetchGetJson(url);
@@ -162,7 +162,7 @@ function removeUnlinkedWikibase(html) {
 		if (nhtml.toLowerCase().includes('unlinkedwikibase') || nhtml.toLowerCase().includes('mdwiki revid')) {
 			element.parentNode.removeChild(element);
 
-			html = html.replace(nhtml, '');
+			html = html.replaceAll(nhtml, '');
 		}
 	});
 
@@ -213,7 +213,7 @@ async function get_new_html_2025(title, tr_type) {
 }
 
 async function get_mdtexts_2024(title) {
-	var title = title.replace(/['" :/]/g, "_");
+	var title = title.replaceAll(/['" :/]/g, "_");
 
 	// const url = "https://medwiki.toolforge.org/mdtexts/segments.php?title=" + title;
 	const url = `/mdtexts/segments.php?title=${title}`;
@@ -271,7 +271,7 @@ async function get_Segments_from_mdwiki(targetLanguage, title, tr_type) {
 
 async function fetchSourcePageContent_mdwiki_new(wikiPage, targetLanguage, tr_type) {
 	// Manual normalisation to avoid redirects on spaces but not to break namespaces
-	var title = wikiPage.getTitle().replace(/ /g, '_');
+	var title = wikiPage.getTitle().replaceAll(/ /g, '_');
 	// ---
 	console.log("tr_type: ", tr_type)
 	// ---
