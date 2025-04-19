@@ -1,17 +1,25 @@
 //
+const mdwiki_last_url = { url: "" };
+
+function get_last_url() {
+	return mdwiki_last_url.url;
+}
+
 async function postUrlParamsResult(endPoint, params = {}) {
 
 	const options = {
 		headers: {
-			'Content-Type': 'application/json',
-			'User-Agent': 'WikiProjectMed Translation Dashboard/1.0 (https://mdwiki.toolforge.org/; tools.mdwiki@toolforge.org)',
+			"Content-Type": "application/json",
+			"User-Agent": "WikiProjectMed Translation Dashboard/1.0 (https://mdwiki.toolforge.org/; tools.mdwiki@toolforge.org)",
 		},
-		method: 'POST',
-		dataType: 'json',
-		// mode: 'no-c',
+		method: "POST",
+		dataType: "json",
+		// mode: "no-c",
 		body: JSON.stringify(params)
 	};
-
+	// ---
+	mdwiki_last_url.url += endPoint + "\n";
+	// ---
 	const output = await fetch(endPoint, options)
 		.then((response) => {
 			if (!response.ok) {
@@ -23,29 +31,6 @@ async function postUrlParamsResult(endPoint, params = {}) {
 		})
 
 	return output;
-}
-
-async function fetchGetJson(url) {
-	const options = {
-		method: 'GET',
-		headers: {
-			'Content-Type': 'application/json',
-			'User-Agent': 'WikiProjectMed Translation Dashboard/1.0 (https://mdwiki.toolforge.org/; tools.mdwiki@toolforge.org)',
-		},
-		dataType: 'json'
-	};
-
-	try {
-		const response = await fetch(url, options);
-		if (!response.ok) {
-			console.error("Fetch GET error:", response.status, response.statusText, url);
-			return false;
-		}
-		return await response.json();
-	} catch (error) {
-		console.error("Fetch GET exception:", error, url);
-		return false;
-	}
 }
 
 function add_sw_categories(html) {
@@ -74,17 +59,33 @@ function add_sw_categories(html) {
 	}
 
 	console.log(JSON.stringify(categories));
-
 	console.log("add_sw_categories. Done");
 
 	return categories;
 }
 
-async function HtmltoSegments(text) {
-	let url = 'https://ncc2c.toolforge.org/HtmltoSegments';
 
-	// if (window.location.hostname === 'localhost') {
-	// 	url = 'http://localhost:8000/HtmltoSegments';
+function isMedwikiHost() {
+	return window.location.hostname === "medwiki.toolforge.org";
+}
+
+function shouldUse2025() {
+	var use2025 = window.location.hostname === "mdwikicx.toolforge.org";
+	// ---
+	// if server == "localhost" then use2025 = false
+	// if (window.location.hostname === "localhost") use2025 = false;
+	// ---
+	// if (user_name === "Mr. Ibrahem" || user_name === "Mr. Ibrahem 1") use2025 = true;
+	// ---
+	return use2025;
+}
+
+// Convert HTML to segmented content
+async function HtmltoSegments(text) {
+	let url = "https://ncc2c.toolforge.org/HtmltoSegments";
+
+	// if (window.location.hostname === "localhost") {
+	// 	url = "http://localhost:8000/HtmltoSegments";
 	// }
 
 	const data = { html: text };
@@ -96,7 +97,7 @@ async function HtmltoSegments(text) {
 	}
 
 	if (responseData.error) {
-		console.error('Error: ' + responseData.error);
+		console.error("Error: " + responseData.error);
 		return "";
 	}
 
@@ -109,16 +110,44 @@ async function HtmltoSegments(text) {
 
 async function getMedwikiHtml(title, tr_type) {
 	title = title.replace(/\s/g, "_");
-	let end_point;
-	({ end_point, title } = get_endpoint_and_title(tr_type, title));
 
-	let newTitle = encodeURIComponent(title).replace(/\//g, '%2F');
+	const { end_point, title: formattedTitle } = get_endpoint_and_title(tr_type, title);
 
-	const url = `${end_point}/w/rest.php/v1/page/${newTitle}/with_html`;
-	const data = await fetchGetJson(url);
-	return data?.html || "";
+	const encodedTitle = encodeURIComponent(formattedTitle).replace(/\//g, "%2F");
+
+	const url = `${end_point}/w/rest.php/v1/page/${encodedTitle}/with_html`;
+
+	const options = {
+		method: "GET",
+		headers: {
+			"Content-Type": "application/json",
+			"User-Agent": "WikiProjectMed Translation Dashboard/1.0 (https://mdwiki.toolforge.org/; tools.mdwiki@toolforge.org)",
+		},
+		dataType: "json"
+	};
+	let data;
+	// ---
+	mdwiki_last_url.url += url + "\n";
+	// ---
+	try {
+		data = await fetch(url, options)
+			.then((response) => {
+				if (response.ok) {
+					return response.json();
+				}
+			})
+			.then((data) => {
+				return data;
+			})
+			.catch((error) => {
+				console.log(error);
+			})
+	} catch (error) {
+		console.log(error);
+	}
+	// ---
+	return data.html || "";
 }
-
 function get_endpoint_and_title(tr_type, title) {
 	let end_point = "https://medwiki.toolforge.org";
 
@@ -132,9 +161,8 @@ function get_endpoint_and_title(tr_type, title) {
 		}
 	}
 
-	if (end_point == "https://medwiki.toolforge.org") {
-		title = "Md:" + title;
-	}
+	title = end_point === ENDPOINTS.medwikiToolforge ? `Md:${title}` : title;
+
 	return { end_point, title };
 }
 
@@ -149,23 +177,23 @@ function get_html_revision(HTMLText) {
 	return "";
 }
 
-
 function removeUnlinkedWikibase(html) {
-	const parser = new DOMParser();
-	const dom = parser.parseFromString(html, 'text/html');
+	const dom = new DOMParser().parseFromString(html, "text/html");
 
-	const elements = dom.getElementsByTagName('span');
+	const elements = dom.getElementsByTagName("span");
 
 	Array.from(elements).forEach(element => {
-		const nhtml = element.outerHTML;
+		const lowerOuterHtml = element.outerHTML.toLowerCase();
 
-		if (nhtml.toLowerCase().includes('unlinkedwikibase') || nhtml.toLowerCase().includes('mdwiki revid')) {
-			element.parentNode.removeChild(element);
+		if (lowerOuterHtml.includes("unlinkedwikibase") || lowerOuterHtml.includes("mdwiki revid")) {
+			// element.parentNode.removeChild(element);
+			// element.remove();
 
-			html = html.replace(nhtml, '');
+			html = html.replace(lowerOuterHtml, '');
 		}
 	});
 
+	// return dom.documentElement.outerHTML;
 	return html;
 }
 
@@ -199,40 +227,89 @@ async function get_from_medwiki_or_mdwiki_api(title, tr_type) {
 
 async function get_new_html_2025(title, tr_type) {
 
-	const fetchParams = {
+	const params = {
 		title: title
 	};
 	if (tr_type === "all") {
-		fetchParams.all = "all";
+		params.all = "all";
 	}
-	// var fetchPageUrl = "https://medwiki.toolforge.org/new_html/index.php?" + $.param(fetchParams);
-	var fetchPageUrl = "/new_html/index.php?" + $.param(fetchParams);
+	let host = (window.location.hostname === "mdwikicx.toolforge.org") ? window.location.hostname : "medwiki.toolforge.org";
+	// ---
+	const url = `https://${host}/new_html/index.php?` + $.param(params);
 
-	const result = await fetchGetJson(fetchPageUrl);
+	const options = {
+		method: "GET",
+		dataType: "json"
+	};
+	// ---
+	mdwiki_last_url.url += url + "\n";
+	// ---
+	const result = await fetch(url, options)
+		.then((response) => {
+			if (!response.ok) {
+				console.error("Error fetching source page: " + response.statusText);
+				return Promise.reject(response);
+			}
+			return response.json();
+
+		})
+		.catch((error) => {
+			console.error("Network error: ", error);
+		});
 	return result;
 }
 
 async function get_mdtexts_2024(title) {
-	let sanitizedTitle = title.replace(/['" :/]/g, "_");
-
-	// const url = "https://medwiki.toolforge.org/mdtexts/segments.php?title=" + sanitizedTitle;
-	const url = `/mdtexts/segments.php?title=${sanitizedTitle}`;
-
-	const data = await fetchGetJson(url);
-	if (!data) {
-		console.log("get_mdtexts_2024: not found");
-		return false;
-	}
+	var title = title.replace(/['" :/]/g, "_");
 
 	const out = {
 		sourceLanguage: "mdwiki",
-		title: sanitizedTitle,
+		title: title,
 		revision: "5200",
 		segmentedContent: "",
 		categories: []
 	}
+	// ---
+	let host = (window.location.hostname === "mdwikicx.toolforge.org") ? window.location.hostname : "medwiki.toolforge.org";
+	const url = `https://${host}/mdtexts/segments.php?title=` + title;
+	// ---
+	const options = {
+		method: "GET",
+		headers: {
+			"Content-Type": "application/json",
+			"User-Agent": "WikiProjectMed Translation Dashboard/1.0 (https://mdwiki.toolforge.org/; tools.mdwiki@toolforge.org)",
+		},
+		dataType: "json"
+	};
+	let data;
+	// ---
+	mdwiki_last_url.url += url + "\n";
+	// ---
+	try {
+		data = await fetch(url, options)
+			.then((response) => {
+				if (response.ok) {
+					return response.json();
+				}
+			})
+			.then((data) => {
+				return data;
+			})
+			.catch((error) => {
+				console.log(error);
+			})
+	} catch (error) {
+		console.log(error);
+	}
+	// ---
+	let html = data.html || "";
+	// ---
+	if (!html || html === "") {
+		console.log("get_mdtexts_2024: not found");
+		return false;
+	}
 
-	var html2 = data.html.replaceAll("&#34;", '"');
+	var html2 = html.replaceAll("&#34;", '"');
 	const matches = html2.match(/Mdwiki_revid"\},"params":\{"1":\{"wt":"(\d+)"\}\}/);
 
 	if (matches && matches[1]) {
@@ -240,83 +317,112 @@ async function get_mdtexts_2024(title) {
 		console.log("get_mdtexts_2024 ", out.revision);
 	}
 
-	out.segmentedContent = removeUnlinkedWikibase(data.html);
+	out.segmentedContent = removeUnlinkedWikibase(html);
 
 	return out;
 }
 
 async function get_Segments_from_mdwiki(targetLanguage, title, tr_type) {
-	// var fetchPageUrl = "https://medwiki.toolforge.org/get_html/index.php";
-	var fetchPageUrl = "/get_html/index.php";
+	// var url = "https://medwiki.toolforge.org/get_html/index.php";
 
-	const fetchParams = {
+	let host = (window.location.hostname === "mdwikicx.toolforge.org") ? window.location.hostname : "medwiki.toolforge.org";
+	const params = {
 		sourcelanguage: "mdwiki",
 		targetlanguage: targetLanguage,
 		tr_type: tr_type,
 		title: title
 	};
+	// ---
+	if (tr_type !== "all") params.section0 = 1;
+	if (tr_type === "all") params.all = "all";
+	// ---
+	var url = `https://${host}/get_html/index.php?` + $.param(params);
 
-	if (tr_type === "all") {
-		fetchParams.all = "all";
-	} else {
-		fetchParams.section0 = 1;
-	}
+	const options = {
+		method: "GET",
+		dataType: "json"
+	};
+	// ---
+	mdwiki_last_url.url += url + "\n";
+	// ---
+	const result = await fetch(url, options)
+		.then((response) => {
+			if (!response.ok) {
+				console.error("Error fetching source page: " + response.statusText);
+				return Promise.reject(response);
+			}
+			return response.json();
 
-	fetchPageUrl = fetchPageUrl + "?" + $.param(fetchParams);
-
-	const result = await fetchGetJson(fetchPageUrl);
+		})
+		.catch((error) => {
+			console.error("Network error: ", error);
+		});
 
 	return result;
-};
+}
 
-async function fetchSourcePageContent_mdwiki_new(page_title, targetLanguage, tr_type, user_name) {
+async function fetchSourcePageContent_mdwiki_user_test(page_title, targetLanguage, tr_type, user_name) {
 	// Manual normalisation to avoid redirects on spaces but not to break namespaces
-	let title = page_title.replace(/ /g, '_');
+	const title = page_title.replace(/ /g, "_");
 	// ---
 	console.log("tr_type: ", tr_type)
 	// ---
-	var use2025 = false;
+	let result1;
 	// ---
-	// if server == "localhost" then use2025 = false
-	if (window.location.hostname === 'mdwikicx.toolforge.org') {
-		use2025 = true;
+	if (user_name === "get_mdtexts_2024") {
+		result1 = await get_mdtexts_2024(title);
+	} else if (user_name === "get_from_medwiki_or_mdwiki_api") {
+		result1 = await get_from_medwiki_or_mdwiki_api(title, tr_type);
+	} else if (user_name === "get_new_html_2025") {
+		result1 = await get_new_html_2025(title, tr_type);
 	}
+	// ---
+	return result1;
+}
 
-	if (use2025) {
-		// if (user_name === "Mr. Ibrahem" || user_name === "Mr. Ibrahem 1") {
-		// var resultx = await get_mdtexts_2024(title);
-		var resultx = await get_new_html_2025(title, tr_type);
-		if (resultx) {
-			return resultx;
-		}
-		// };
-	};
-
-	if (window.location.hostname === 'medwiki.toolforge.org') {
-		var resultn = await get_from_medwiki_or_mdwiki_api(title, tr_type);
-
-		if (resultn) {
-			return resultn;
-		}
+async function fetchSourcePageContent_mdwiki_new(page_title, targetLanguage, tr_type, user_name) {
+	// Manual normalisation to avoid redirects on spaces but not to break namespaces
+	const title = page_title.replace(/ /g, "_");
+	// ---
+	// Try 2025 method first if applicable
+	if (shouldUse2025()) {
+		const result = await get_new_html_2025(title, tr_type);
+		if (result) return result;
 	}
-
+	// ---
+	// try segments method
+	// ---
 	const result = await get_Segments_from_mdwiki(targetLanguage, title, tr_type);
-
-	return result;
-
-};
+	if (result) return result;
+	// ---
+	// Try medwiki method if on medwiki host
+	if (isMedwikiHost()) {
+		const result = await get_from_medwiki_or_mdwiki_api(title, tr_type);
+		if (result) return result;
+	}
+	// ---
+	return "";
+}
 
 async function fetchSourcePageContent_mdwiki(page_title, targetLanguage, tr_type, user_name) {
-	let result = await fetchSourcePageContent_mdwiki_new(page_title, targetLanguage, tr_type, user_name);
-
-	if (result && result.segmentedContent && targetLanguage == "sw") {
-		let categories = add_sw_categories(result.segmentedContent);
-		result.categories = categories;
+	mdwiki_last_url.url = "";
+	// ---
+	// if page_title start with "Video:" then tr_type = all
+	if (page_title.startsWith("Video:") || page_title.startsWith("video:")) {
+		tr_type = "all";
 	}
+	// ---
+	const result = await fetchSourcePageContent_mdwiki_new(page_title, targetLanguage, tr_type, user_name);
+	// ---
+	if (result && result.segmentedContent && targetLanguage === "sw") {
+		result.categories = add_sw_categories(result.segmentedContent);
+	}
+	// ---
 	return result;
-
-};
+}
 
 mw.cx.TranslationMdwiki = {
-	fetchSourcePageContent_mdwiki
+	fetchSourcePageContent_mdwiki,
+	fetchSourcePageContent_mdwiki_user_test,
+	get_last_url,
 }
