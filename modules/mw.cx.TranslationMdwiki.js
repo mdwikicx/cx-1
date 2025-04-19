@@ -205,7 +205,7 @@ function removeUnlinkedWikibase(html) {
 			// element.parentNode.removeChild(element);
 			// element.remove();
 
-			html = html.replace(lowerOuterHtml, '');
+			html = html.replace(element.outerHTML, '');
 		}
 	});
 
