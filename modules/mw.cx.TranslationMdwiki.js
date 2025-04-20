@@ -274,6 +274,9 @@ async function get_Segments_from_mdwiki(targetLanguage, title, tr_type) {
 async function fetchSourcePageContent_mdwiki_user_test(page_title, targetLanguage, tr_type, user_name) {
 	mdwiki_last_url.url = "";
 	// ---
+	// make first litter Capital
+	page_title = page_title.charAt(0).toUpperCase() + page_title.slice(1);
+	// ---
 	// if page_title start with "Video:" then tr_type = all
 	if (page_title.startsWith("Video:") || page_title.startsWith("video:")) {
 		tr_type = "all";
@@ -300,6 +303,9 @@ async function fetchSourcePageContent_mdwiki_user_test(page_title, targetLanguag
 }
 
 async function fetchSourcePageContent_mdwiki_new(page_title, targetLanguage, tr_type, user_name) {
+	// make first litter Capital
+	page_title = page_title.charAt(0).toUpperCase() + page_title.slice(1);
+	// ---
 	// Manual normalisation to avoid redirects on spaces but not to break namespaces
 	const title = page_title.replace(/ /g, "_");
 	// ---
