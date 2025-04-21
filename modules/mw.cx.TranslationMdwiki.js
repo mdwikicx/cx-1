@@ -57,6 +57,7 @@ async function fetchJson(url, options) {
 	options.headers = {
 		"Content-Type": "application/json",
 		"User-Agent": "WikiProjectMed Translation Dashboard/1.0 (https://mdwiki.toolforge.org/; tools.mdwiki@toolforge.org)",
+		...(options.headers ?? {})
 	};
 	// ---
 	try {
@@ -343,7 +344,7 @@ async function fetchSourcePageContent_mdwiki(page_title, targetLanguage, tr_type
 	const result = await fetchSourcePageContent_mdwiki_new(page_title, targetLanguage, tr_type, user_name);
 	// ---
 	if (result && result.segmentedContent && targetLanguage === "sw") {
-		result.categories = add_sw_categories(result.segmentedContent);
+		result.categories = await add_sw_categories(result.segmentedContent);
 	}
 	// ---
 	return result;
