@@ -109,7 +109,8 @@ async function get_mdtexts_2024(title) {
 	const html = data.html.replaceAll("&#34;", '"');
 	const matches = html.match(/Mdwiki_revid"\},"params":\{"1":\{"wt":"(\d+)"\}\}/);
 	// ---
-	if (matches && matches[1]) {
+	// if (matches && matches[1]) {
+	if (matches?.[1]) {
 		out.revision = matches[1];
 		console.log("get_mdtexts_2024 ", out.revision);
 	}
@@ -186,7 +187,8 @@ function get_endpoint_and_title(tr_type, title) {
 function get_html_revision(HTMLText) {
 	if (HTMLText !== '') {
 		const matches = HTMLText.match(/Redirect\/revision\/(\d+)/);
-		if (matches && matches[1]) {
+		// if (matches && matches[1]) {
+		if (matches?.[1]) {
 			const revision = matches[1];
 			return revision;
 		}
@@ -343,7 +345,8 @@ async function fetchSourcePageContent_mdwiki(page_title, targetLanguage, tr_type
 	// ---
 	const result = await fetchSourcePageContent_mdwiki_new(page_title, targetLanguage, tr_type, user_name);
 	// ---
-	if (result && result.segmentedContent && targetLanguage === "sw") {
+	// if (result && result.segmentedContent && targetLanguage === "sw") {
+	if (result?.segmentedContent && targetLanguage === "sw") {
 		result.categories = await add_sw_categories(result.segmentedContent);
 	}
 	// ---
