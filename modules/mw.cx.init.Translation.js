@@ -393,6 +393,12 @@ mw.cx.init.Translation.prototype.fetchDraftTranslation = function (
  * @return {Promise<mw.cx.dm.DraftTranslationDTO|null>} Draft or null.
  */
 mw.cx.init.Translation.prototype.fetchDraftTranslationSuccess = function (draft, conflict) {
+	const admin_users = ['Doc James', 'Mr. Ibrahem 1'];
+	if (admin_users.includes(mw.user.getName())) {
+		console.log('[CX] fetchDraftTranslationSuccess. admin_users');
+		// Stop further processing
+		return Promise.resolve(null);
+	}
 	// Do not allow two users to start a draft at the same time. The API only returns
 	// a conflict (providing the conflicting translator's name and gender, if this is the case.
 	if (conflict) {
