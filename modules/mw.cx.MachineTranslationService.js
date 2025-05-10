@@ -17,6 +17,7 @@ mw.cx.MachineTranslationService = function MwCxMachineTranslationService(
 	this.sourceLanguage = sourceLanguage;
 
 	// if (sourceLanguage === 'mdwiki') { this.sourceLanguage = 'en'; }
+	// TODO: mdwiki work
 
 	this.targetLanguage = targetLanguage;
 	this.siteMapper = siteMapper;
@@ -199,7 +200,7 @@ mw.cx.MachineTranslationService.prototype.fetchCXServerToken_issue = function ()
 		}
 		const options = {
 			method: 'GET',
-			dataType: 'json'
+			headers: { 'Accept': 'application/json' }
 		}
 
 		var url = "https://mdwiki.toolforge.org/publish/token.php?" + $.param(params)
@@ -244,7 +245,7 @@ mw.cx.MachineTranslationService.prototype.fetchCXServerToken = function () {
 		}
 		const options = {
 			method: 'GET',
-			dataType: 'json'
+			headers: { 'Accept': 'application/json' }
 		}
 
 		var url = "https://mdwiki.toolforge.org/publish/token.php?" + $.param(params)
