@@ -312,16 +312,16 @@ async function fetchSourcePageContent_mdwiki_new(page_title, targetLanguage, tr_
 	// Manual normalisation to avoid redirects on spaces but not to break namespaces
 	const title = page_title.replace(/ /g, "_");
 	// ---
+	// try segments method
+	// ---
+	const result = await get_Segments_from_mdwiki(targetLanguage, title, tr_type);
+	if (result) return result;
+	// ---
 	// Try 2025 method first if applicable
 	// if (shouldUse2025()) {
 	const result0 = await get_new_html_2025(title, tr_type);
 	if (result0) return result0;
 	// }
-	// ---
-	// try segments method
-	// ---
-	const result = await get_Segments_from_mdwiki(targetLanguage, title, tr_type);
-	if (result) return result;
 	// ---
 	// const result2 = await get_mdtexts_2024(title);
 	// if (result2) return result2;
