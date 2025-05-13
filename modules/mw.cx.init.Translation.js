@@ -406,9 +406,9 @@ mw.cx.init.Translation.prototype.fetchDraftTranslationSuccess = function (draft,
 	if (conflict && !admin_users.includes(mw.user.getName())) {
 		mw.log('[CX] Existing translation in last 24 hours by another translator found.');
 		// تعيين علامة التعارض في نموذج الترجمة إذا كان موجودًا
-		// Mr. Ibrahem
+		// By: Ibrahem Qasim
 		if (this.translationModel) {
-			this.translationModel.setHasConflict(true);
+			this.translationModel.setHasConflict();
 		}
 		this.translationView.showConflictWarning(conflict.name, conflict.gender);
 		// Stop further processing
