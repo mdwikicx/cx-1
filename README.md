@@ -1,3 +1,5 @@
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/mdwikicx/cx-1)
+
 # ContentTranslation
 
 ContentTranslation is a tool that allows editors to translate
