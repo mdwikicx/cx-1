@@ -533,8 +533,6 @@ ve.init.mw.CXTarget.prototype.onSurfaceReady = function () {
 	if ( this.translation.hasTranslatedSections() ) {
 		mw.log.warn( '[CX] Translation has Translated Sections, skipping auto translations.' );
 		this.targetSurface.$element.addClass( 've-ui-cxTargetSurface--non-empty' );
-	} else if ( this.translation.hasTranslationConflict() ) {
-		mw.log.warn( '[CX] Translation has conflict, skipping auto translations.' );
 	} else {
 		mw.log.warn( '[CX] Start auto translations.' );
 		const sections = $('.cx-column--translation article').find('section');
