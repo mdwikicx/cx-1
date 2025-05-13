@@ -530,6 +530,8 @@ ve.init.mw.CXTarget.prototype.onSurfaceReady = function () {
 
 	if ( this.translation.hasTranslatedSections() ) {
 		this.targetSurface.$element.addClass( 've-ui-cxTargetSurface--non-empty' );
+	} else if (this.translation.hasTranslationConflict()) {
+		console.log("hasTranslationConflict, No auto translations!.")
 	} else {
 		// Don't start auto translations if there are Translated Sections;
 		// By: Ibrahem Qasim

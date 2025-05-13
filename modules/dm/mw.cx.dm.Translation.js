@@ -16,6 +16,9 @@ mw.cx.dm.Translation = function MwCxDmTranslation( sourceWikiPage, targetWikiPag
 	// Mixin constructor
 	OO.EventEmitter.call( this );
 
+	// Mr. Ibrahem for auto translation
+	this.hasConflict = false;
+
 	this.sourceWikiPage = sourceWikiPage;
 	this.targetWikiPage = targetWikiPage;
 	this.id = null;
@@ -799,4 +802,21 @@ mw.cx.dm.Translation.prototype.getTranslationIssues = function () {
 	return this.translationIssues.filter( function ( issue ) {
 		return !issue.isSuppressed();
 	} );
+};
+/**
+ * Mr. Ibrahem
+ * تعيين حالة التعارض
+ * @param {boolean} hasConflict
+ */
+mw.cx.dm.Translation.prototype.setHasConflict = function (hasConflict) {
+    this.hasConflict = hasConflict;
+};
+
+/**
+ * Mr. Ibrahem
+ * التحقق مما إذا كان هناك تعارض
+ * @return {boolean}
+ */
+mw.cx.dm.Translation.prototype.hasTranslationConflict = function () {
+    return this.hasConflict;
 };
