@@ -217,11 +217,11 @@ mw.cx.TargetArticle.prototype.publishSuccess = function (response, jqXHR) {
 	console.log("publishSuccess:");
 
 	// const mdwiki_result = publishResult.mdwiki_result || [];
-	const wikipedia_result = publishResult.wikipedia_result || [];
+	const wikipedia_result = publishResult?.wikipedia_result;
 
 	const wd_data = wikipedia_result.LinkToWikidata || publishResult.LinkToWikidata;
 
-	if (publishResult.wikipedia_result) {
+	if (wikipedia_result) {
 		// console.log("_____");
 		// console.log("local result: " + JSON.stringify(publishResult.local_result, null, 1));
 		const resultCopy = { ...wikipedia_result };
@@ -264,11 +264,10 @@ mw.cx.TargetArticle.prototype.publishSuccess = function (response, jqXHR) {
 
 		return done;
 	}
-	const result_captcha = wikipedia_result.edit?.captcha || [];
-	if (result_captcha) {
+	if (wikipedia_result?.edit?.captcha) {
 		// If there is a captcha challenge, get the solution and retry.
 		return this.loadCaptchaDialog().then(
-			this.showErrorCaptcha.bind(this, result_captcha)
+			this.showErrorCaptcha.bind(this, wikipedia_result.edit.captcha)
 		);
 	}
 
