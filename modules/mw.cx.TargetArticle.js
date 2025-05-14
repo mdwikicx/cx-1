@@ -216,10 +216,12 @@ mw.cx.TargetArticle.prototype.publishSuccess = function (response, jqXHR) {
 	const publishResult = response[publishAction];
 	console.log("publishResult:");
 
+	const mdwiki_result = publishResult.save_result_all?.mdwiki_result || [];
+
 	if (publishResult.save_result_all) {
 		console.log("_____");
 		console.log("local result: " + JSON.stringify(publishResult.save_result_all.result));
-		console.log("mdwiki_result: " + JSON.stringify(publishResult.save_result_all.mdwiki_result));
+		console.log("mdwiki_result: " + JSON.stringify(mdwiki_result));
 	} else {
 		console.log(JSON.stringify(publishResult));
 	}
@@ -229,18 +231,22 @@ mw.cx.TargetArticle.prototype.publishSuccess = function (response, jqXHR) {
 		if (this.sourceLanguage === "mdwiki" && publishResult.published_to != "local") {
 			targeturl = publishResult.targeturl_wiki;
 		}
-		var qid = "";
+		const wd_data = (mdwiki_result.LinkToWikidata)
+			? mdwiki_result.LinkToWikidata
+			: publishResult.LinkToWikidata;
+
 		var wd_result = "";
-		if (publishResult.LinkToWikidata) {
-			qid = publishResult.LinkToWikidata.qid;
-			console.log('LinkToWikidata: ' + JSON.stringify(publishResult.LinkToWikidata));
+		var qid = "";
+		if (wd_data) {
+			qid = wd_data.qid;
+			console.log('LinkToWikidata: ' + JSON.stringify(wd_data));
 			// LinkToWikidata: {"result":"success","qid":"Q474070"}
-			wd_result = publishResult.LinkToWikidata.result;
+			wd_result = wd_data.result;
 		}
 
 		this.translation.setTargetURL(targeturl);
 
-		var new_title = publishResult.save_result_all.mdwiki_result.edit.title;
+		var new_title = mdwiki_result.edit.title;
 		// mdwiki_result: {"warnings":{"main":{"*":"Unrecognized parameters: wpCaptchaId, wpCaptchaWord."}},"edit":{"new":"","result":"Success","pageid":9895285,"title":"مستخدم:Mr. Ibrahem/أوبلتوكسيماب","contentmodel":"wikitext","oldrevid":0,"newrevid":69736856,"newtimestamp":"2025-03-02T00:36:55Z","watched":""},"LinkToWikidata":{"error":"Cannot create link for namespace:2","nserror":"","qid":"Q7876570"}}
 
 		var done = this.publishComplete(new_title || null);
@@ -259,8 +265,8 @@ mw.cx.TargetArticle.prototype.publishSuccess = function (response, jqXHR) {
 			this.showErrorCaptcha.bind(this, publishResult.edit.captcha)
 		);
 	}
-	const publish_Result = (publishResult.save_result_all && publishResult.save_result_all.mdwiki_result)
-		? publishResult.save_result_all.mdwiki_result
+	const publish_Result = (mdwiki_result && mdwiki_result.length > 0)
+		? mdwiki_result
 		: publishResult;
 
 	// Any other failure
