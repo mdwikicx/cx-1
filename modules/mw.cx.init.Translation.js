@@ -397,7 +397,7 @@ mw.cx.init.Translation.prototype.fetchDraftTranslationSuccess = function (draft,
 
 	if (admin_users.includes(mw.user.getName()) && conflict) {
 		console.log('[CX] fetchDraftTranslationSuccess. admin_users');
-		mw.hook('mw.cx.warning').fire(`Existing translation in last 24 hours by ${conflict.name}. `);
+		mw.hook('mw.cx.warning').fire(`[TD] Existing translation in last 24 hours by ${conflict.name}. `);
 		// Stop further processing
 		return Promise.resolve(null);
 	}

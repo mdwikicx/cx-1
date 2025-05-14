@@ -172,7 +172,7 @@ mw.cx.MachineTranslationService.prototype.cxtoken_error = function () {
 
 	// mw.hook('mw.cx.error').fire('Unable to fetch cxtoken. !! ');
 	let html_text = "<a href='https://mdwiki.toolforge.org/Translation_Dashboard/auth.php?a=login' target='_blank'>Translation Dashboard</a>";
-	mw.hook('mw.cx.error').fire('OAuth session expired, Please Login again in ');
+	mw.hook('mw.cx.error').fire('[TD] OAuth session expired, Please Login again in ');
 
 	// wait 2 seconds then do the next line
 

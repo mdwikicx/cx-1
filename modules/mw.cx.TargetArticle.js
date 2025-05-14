@@ -305,7 +305,7 @@ mw.cx.TargetArticle.prototype.publishFail = function (errorCode, messageOrFailOb
 		this.getTargetTitle(),
 		data
 	);
-	let mddx = "OAuth session expired, Please Log again to Translation Dashboard";
+	let mddx = "[TD] OAuth session expired, Please Log again to Translation Dashboard";
 	// cx-message-widget-message
 	let mddxlink = "OAuth session expired, Please Log again to <a href='https://mdwiki.toolforge.org/Translation_Dashboard/auth.php?a=login' target='_blank'>Translation Dashboard</a>";
 	// {"result":"error","edit":{"error":"noaccess","username":"Mr. Ibrahem"}}
