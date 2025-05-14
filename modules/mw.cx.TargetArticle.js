@@ -218,6 +218,8 @@ mw.cx.TargetArticle.prototype.publishSuccess = function (response, jqXHR) {
 
 	const mdwiki_result = publishResult.save_result_all?.mdwiki_result || [];
 
+	const wd_data = mdwiki_result.LinkToWikidata || publishResult.LinkToWikidata;
+
 	if (publishResult.save_result_all) {
 		console.log("_____");
 		console.log("local result: " + JSON.stringify(publishResult.save_result_all.result));
@@ -231,10 +233,6 @@ mw.cx.TargetArticle.prototype.publishSuccess = function (response, jqXHR) {
 		if (this.sourceLanguage === "mdwiki" && publishResult.published_to != "local") {
 			targeturl = publishResult.targeturl_wiki;
 		}
-		const wd_data = (mdwiki_result.LinkToWikidata)
-			? mdwiki_result.LinkToWikidata
-			: publishResult.LinkToWikidata;
-
 		var wd_result = "";
 		var qid = "";
 		if (wd_data) {
@@ -297,7 +295,7 @@ mw.cx.TargetArticle.prototype.publishComplete = function (apiTargetTitle) {
  */
 mw.cx.TargetArticle.prototype.publishFail = function (errorCode, messageOrFailObjOrData, data, jqXHR) {
 	if (!data) {
-		mw.log.warn( '[TD] publishFail no data' );
+		mw.log.warn('[TD] publishFail no data');
 		if (errorCode === 'ok-but-empty') {
 			this.showPublishError(mw.msg('cx-publish-error-empty'));
 			return;
