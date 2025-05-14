@@ -34,7 +34,7 @@ async function add_sw_categories(html) {
 
 	if (regexInfoboxMedicalCondition.test(html)) categories.push(createCategoryObject("Magonjwa"));
 
-	console.log(JSON.stringify(categories));
+	console.log(JSON.stringify(categories, null, 1));
 
 	console.log("add_sw_categories. Done");
 

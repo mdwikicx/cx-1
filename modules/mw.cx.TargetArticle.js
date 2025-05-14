@@ -223,10 +223,12 @@ mw.cx.TargetArticle.prototype.publishSuccess = function (response, jqXHR) {
 
 	if (publishResult.wikipedia_result) {
 		console.log("_____");
-		// console.log("local result: " + JSON.stringify(publishResult.local_result));
-		console.log("wikipedia_result: " + JSON.stringify(wikipedia_result));
+		// console.log("local result: " + JSON.stringify(publishResult.local_result, null, 1));
+		const resultCopy = { ...wikipedia_result };
+		delete resultCopy.LinkToWikidata;
+		console.log("wikipedia_result:", JSON.stringify(resultCopy, null, 1));
 	} else {
-		console.log(JSON.stringify(publishResult));
+		console.log(JSON.stringify(publishResult, null, 1));
 	}
 	const result_success =
 		wikipedia_result.edit.result.toLowerCase() === 'success' ||
@@ -242,7 +244,7 @@ mw.cx.TargetArticle.prototype.publishSuccess = function (response, jqXHR) {
 		var qid = "";
 		if (wd_data) {
 			qid = wd_data.qid;
-			console.log('LinkToWikidata: ' + JSON.stringify(wd_data));
+			console.log('LinkToWikidata: ' + JSON.stringify(wd_data, null, 1));
 			// LinkToWikidata: {"result":"success","qid":"Q474070"}
 			wd_result = wd_data.result;
 		}
