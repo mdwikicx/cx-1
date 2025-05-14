@@ -225,11 +225,11 @@ mw.cx.MachineTranslationService.prototype.fetchCXServerToken_MDWIKI_issue = func
 	return result;
 };
 
-mw.cx.MachineTranslationService.prototype.fetchCXServerToken_MDWIKI = function () {
-	var params = {
+mw.cx.MachineTranslationService.prototype.fetchCxServerTokenMdwiki = function () {
+	const params = {
 		user: mw.user.getName(),
 		wiki: this.targetLanguage,
-		ty: "cxtoken",
+		ty: "cxtoken"
 	}
 	const options = {
 		method: 'GET',
@@ -250,7 +250,7 @@ mw.cx.MachineTranslationService.prototype.fetchCXServerToken_MDWIKI = function (
 mw.cx.MachineTranslationService.prototype.fetchCXServerToken = function () {
 
 	if (this.sourceLanguage === "mdwiki") {
-		return this.fetchCXServerToken_MDWIKI();
+		return this.fetchCxServerTokenMdwiki();
 	};
 
 	return new mw.Api().postWithToken('csrf', {

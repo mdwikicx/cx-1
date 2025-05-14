@@ -222,10 +222,14 @@ mw.cx.TargetArticle.prototype.publishSuccess = function (response, jqXHR) {
 	const wd_data = wikipedia_result.LinkToWikidata || publishResult.LinkToWikidata;
 
 	if (wikipedia_result) {
-		// console.log("_____");
 		// console.log("local result: " + JSON.stringify(publishResult.local_result, null, 1));
-		const resultCopy = { ...wikipedia_result };
-		delete resultCopy.LinkToWikidata;
+		// console.log("_____");
+		// ---
+		// const resultCopy = { ...wikipedia_result };
+		// delete resultCopy.LinkToWikidata;
+		// ---
+		const { LinkToWikidata, ...resultCopy } = wikipedia_result;
+		// ---
 		console.log("wikipedia_result:", JSON.stringify(resultCopy, null, 1));
 	} else {
 		console.log(JSON.stringify(publishResult, null, 1));
@@ -251,7 +255,7 @@ mw.cx.TargetArticle.prototype.publishSuccess = function (response, jqXHR) {
 
 		this.translation.setTargetURL(targeturl);
 
-		var new_title = wikipedia_result.edit.title || null;
+		var new_title = wikipedia_result?.edit?.title ?? null;
 		// wikipedia_result: {"warnings":{"main":{"*":"Unrecognized parameters: wpCaptchaId, wpCaptchaWord."}},"edit":{"new":"","result":"Success","pageid":9895285,"title":"مستخدم:Mr. Ibrahem/أوبلتوكسيماب","contentmodel":"wikitext","oldrevid":0,"newrevid":69736856,"newtimestamp":"2025-03-02T00:36:55Z","watched":""},"LinkToWikidata":{"error":"Cannot create link for namespace:2","nserror":"","qid":"Q7876570"}}
 
 		var done = this.publishComplete(new_title);

@@ -178,7 +178,7 @@ class ApiContentTranslationPublish extends ApiBase
 			$user_name = $params['user'];
 		}
 
-		$wikipedia_result = false;
+		$wikipedia_result = [];
 
 		if ($params['from'] === "mdwiki") { #$wikipedia_result
 
