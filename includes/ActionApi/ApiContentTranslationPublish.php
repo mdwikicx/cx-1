@@ -414,8 +414,8 @@ class ApiContentTranslationPublish extends ApiBase
 		$result['local_result'] = $saveresult_all['local_result'] ?? [];
 
 		// if warnings in $result['local_result'] del it
-		unset($result['wikipedia_result']['warnings']);
-		unset($result['local_result']['warnings']);
+		// unset($result['wikipedia_result']['warnings']);
+		// unset($result['local_result']['warnings']);
 
 		$this->getResult()->addValue(null, $this->getModuleName(), $result);
 	}
