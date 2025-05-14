@@ -216,14 +216,14 @@ mw.cx.TargetArticle.prototype.publishSuccess = function (response, jqXHR) {
 	const publishResult = response[publishAction];
 	console.log("publishResult:");
 
-	// const mdwiki_result = publishResult.save_result_all?.mdwiki_result || [];
-	const wikipedia_result = publishResult.save_result_all?.wikipedia_result || [];
+	// const mdwiki_result = publishResult.mdwiki_result || [];
+	const wikipedia_result = publishResult.wikipedia_result || [];
 
 	const wd_data = wikipedia_result.LinkToWikidata || publishResult.LinkToWikidata;
 
-	if (publishResult.save_result_all) {
+	if (publishResult.wikipedia_result) {
 		console.log("_____");
-		// console.log("local result: " + JSON.stringify(publishResult.save_result_all.result));
+		// console.log("local result: " + JSON.stringify(publishResult.local_result));
 		console.log("wikipedia_result: " + JSON.stringify(wikipedia_result));
 	} else {
 		console.log(JSON.stringify(publishResult));

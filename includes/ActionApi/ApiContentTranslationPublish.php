@@ -352,18 +352,18 @@ class ApiContentTranslationPublish extends ApiBase
 			);
 		}
 
-		$save_result_all = $this->saveWikitext($targetTitle, $wikitext, $params);
+		$saveresult_all = $this->saveWikitext($targetTitle, $wikitext, $params);
 
-		$saveresult = $save_result_all['local_result'] ?? [];
+		$saveresult = $saveresult_all['local_result'] ?? [];
 
 		if ($params['from'] === "mdwiki") {
-			$saveresult = $save_result_all['wikipedia_result'] ?? [];
+			$saveresult = $saveresult_all['wikipedia_result'] ?? [];
 		};
 
 		$save_edit = $saveresult['edit'] ?? [];
 		$editStatus = $saveresult['edit']['result'] ?? [];
 
-		if ($editStatus === 'Success') {
+		if (strtolower($editStatus) === 'success') {
 			if (isset($save_edit['newrevid'])) {
 				$tags = $this->getTags($params);
 				// Add the tags post-send, after RC row insertion
@@ -408,7 +408,10 @@ class ApiContentTranslationPublish extends ApiBase
 				'edit' => $save_edit ?? []
 			];
 		}
-		$result['save_result_all'] = $save_result_all;
+
+		// $result['save_result_all'] = $saveresult_all;
+		$result['wikipedia_result'] = $saveresult_all['wikipedia_result'] ?? [];
+		$result['local_result'] = $saveresult_all['local_result'] ?? [];
 
 		$this->getResult()->addValue(null, $this->getModuleName(), $result);
 	}
