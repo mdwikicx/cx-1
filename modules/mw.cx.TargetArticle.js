@@ -259,9 +259,12 @@ mw.cx.TargetArticle.prototype.publishSuccess = function (response, jqXHR) {
 			this.showErrorCaptcha.bind(this, publishResult.edit.captcha)
 		);
 	}
+	const publish_Result = (publishResult.save_result_all && publishResult.save_result_all.mdwiki_result)
+		? publishResult.save_result_all.mdwiki_result
+		: publishResult;
 
 	// Any other failure
-	return this.publishFail('', publishResult, publishResult, jqXHR);
+	return this.publishFail('', {}, publish_Result, jqXHR);
 };
 
 /**
@@ -288,6 +291,7 @@ mw.cx.TargetArticle.prototype.publishComplete = function (apiTargetTitle) {
  */
 mw.cx.TargetArticle.prototype.publishFail = function (errorCode, messageOrFailObjOrData, data, jqXHR) {
 	if (!data) {
+		mw.log.warn( '[TD] publishFail no data' );
 		if (errorCode === 'ok-but-empty') {
 			this.showPublishError(mw.msg('cx-publish-error-empty'));
 			return;
