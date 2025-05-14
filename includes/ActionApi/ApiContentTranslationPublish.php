@@ -363,7 +363,7 @@ class ApiContentTranslationPublish extends ApiBase
 		$save_edit = $saveresult['edit'] ?? [];
 		$editStatus = $saveresult['edit']['result'] ?? [];
 
-		if (strtolower($editStatus) === 'success') {
+		if ($editStatus === 'success' || $editStatus === 'Success') {
 			if (isset($save_edit['newrevid'])) {
 				$tags = $this->getTags($params);
 				// Add the tags post-send, after RC row insertion
