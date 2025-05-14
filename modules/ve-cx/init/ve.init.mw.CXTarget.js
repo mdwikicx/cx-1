@@ -534,13 +534,16 @@ ve.init.mw.CXTarget.prototype.onSurfaceReady = function () {
 		mw.log.warn( '[CX] Translation has Translated Sections, skipping auto translations.' );
 		this.targetSurface.$element.addClass( 've-ui-cxTargetSurface--non-empty' );
 	} else {
-		mw.log.warn( '[CX] Start auto translations.' );
 		const sections = $('.cx-column--translation article').find('section');
-
-		for (let i = 0; i < sections.length; i++) {
-			setTimeout(() => {
-				this.prefetchTranslationForSection(i, true);
-			}, i * 1000);
+		if ( sections && sections.length > 0 ) {
+			mw.log.warn( '[CX] Start auto translations.' );
+			for (let i = 0; i < sections.length; i++) {
+				setTimeout(() => {
+					this.prefetchTranslationForSection(i, true);
+				}, i * 1000);
+			}
+		} else {
+			mw.log.warn( '[CX] No sections to start auto translations.' );
 		}
 	}
 };
