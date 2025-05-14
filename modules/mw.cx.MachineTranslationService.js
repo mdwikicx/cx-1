@@ -250,7 +250,7 @@ mw.cx.MachineTranslationService.prototype.fetchCXServerToken_MDWIKI = function (
 mw.cx.MachineTranslationService.prototype.fetchCXServerToken = function () {
 
 	if (this.sourceLanguage === "mdwiki") {
-		return this.fetchCXServerToken_MDWIKI()
+		return this.fetchCXServerToken_MDWIKI();
 	};
 
 	return new mw.Api().postWithToken('csrf', {

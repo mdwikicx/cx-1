@@ -60,7 +60,7 @@ function post_to_target($params)
 
 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
-	// mdwiki_result: {"response":"Requests must have a user agent"}
+	// wikipedia_result: {"response":"Requests must have a user agent"}
 	curl_setopt($ch, CURLOPT_USERAGENT, $usr_agent);
 	curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 15);
 	curl_setopt($ch, CURLOPT_TIMEOUT, 15);
@@ -142,8 +142,8 @@ class ApiContentTranslationPublish extends ApiBase
 			$t_Params['wpCaptchaWord'] = $params['wpCaptchaWord'];
 		}
 
-		$mdwiki_result = post_to_target($t_Params);
-		return $mdwiki_result;
+		$wikipedia_result = post_to_target($t_Params);
+		return $wikipedia_result;
 	}
 	protected function saveWikitext($title, $wikitext, $params)
 	{
@@ -178,11 +178,11 @@ class ApiContentTranslationPublish extends ApiBase
 			$user_name = $params['user'];
 		}
 
-		$mdwiki_result = false;
+		$wikipedia_result = false;
 
-		if ($params['from'] === "mdwiki") { #$mdwiki_result
+		if ($params['from'] === "mdwiki") { #$wikipedia_result
 
-			$mdwiki_result = $this->publishToMdwiki($title, $wikitext, $params, $sourceRevisionId, $summary, $user_name);
+			$wikipedia_result = $this->publishToMdwiki($title, $wikitext, $params, $sourceRevisionId, $summary, $user_name);
 			$this->published_to = "mdwiki";
 			// return $Result;
 
@@ -210,11 +210,11 @@ class ApiContentTranslationPublish extends ApiBase
 
 		$api->execute();
 		$result = $api->getResult()->getResultData();
-		// if ( $params['from'] === "mdwiki") return $mdwiki_result;
+		// if ( $params['from'] === "mdwiki") return $wikipedia_result;
 
 		return [
-			'result' => $result,
-			'mdwiki_result' => $mdwiki_result,
+			'local_result' => $result,
+			'wikipedia_result' => $wikipedia_result,
 		];
 	}
 
@@ -354,11 +354,10 @@ class ApiContentTranslationPublish extends ApiBase
 
 		$save_result_all = $this->saveWikitext($targetTitle, $wikitext, $params);
 
-		$saveresult = $save_result_all['result'] ?? [];
-		$saveresult_mdwiki = $save_result_all['mdwiki_result'] ?? [];
+		$saveresult = $save_result_all['local_result'] ?? [];
 
 		if ($params['from'] === "mdwiki") {
-			$saveresult = $saveresult_mdwiki;
+			$saveresult = $save_result_all['wikipedia_result'] ?? [];
 		};
 
 		$save_edit = $saveresult['edit'] ?? [];
@@ -388,9 +387,7 @@ class ApiContentTranslationPublish extends ApiBase
 				'published_to' => $this->published_to
 			];
 
-			if (is_array($saveresult) && isset($saveresult['LinkToWikidata'])) {
-				$result['LinkToWikidata'] = $saveresult['LinkToWikidata'];
-			};
+			// if (is_array($saveresult) && isset($saveresult['LinkToWikidata'])) $result['LinkToWikidata'] = $saveresult['LinkToWikidata'];
 
 			$this->translation->translation['status'] = TranslationStore::TRANSLATION_STATUS_PUBLISHED;
 			$this->translation->translation['targetURL'] = $targetURL;

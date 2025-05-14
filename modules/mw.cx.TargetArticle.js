@@ -216,19 +216,24 @@ mw.cx.TargetArticle.prototype.publishSuccess = function (response, jqXHR) {
 	const publishResult = response[publishAction];
 	console.log("publishResult:");
 
-	const mdwiki_result = publishResult.save_result_all?.mdwiki_result || [];
+	// const mdwiki_result = publishResult.save_result_all?.mdwiki_result || [];
+	const wikipedia_result = publishResult.save_result_all?.wikipedia_result || [];
 
-	const wd_data = mdwiki_result.LinkToWikidata || publishResult.LinkToWikidata;
+	const wd_data = wikipedia_result.LinkToWikidata || publishResult.LinkToWikidata;
 
 	if (publishResult.save_result_all) {
 		console.log("_____");
-		console.log("local result: " + JSON.stringify(publishResult.save_result_all.result));
-		console.log("mdwiki_result: " + JSON.stringify(mdwiki_result));
+		// console.log("local result: " + JSON.stringify(publishResult.save_result_all.result));
+		console.log("wikipedia_result: " + JSON.stringify(wikipedia_result));
 	} else {
 		console.log(JSON.stringify(publishResult));
 	}
+	const result_success =
+		wikipedia_result.edit.result.toLowerCase() === 'success' ||
+		publishResult.result.toLowerCase() === 'success';
+
 	// {"result":"error","edit":{"error":"noaccess","username":"Mr. Ibrahem"}}
-	if (publishResult.result === 'success') {
+	if (result_success) {
 		var targeturl = publishResult.targeturl;
 		if (this.sourceLanguage === "mdwiki" && publishResult.published_to != "local") {
 			targeturl = publishResult.targeturl_wiki;
@@ -244,28 +249,27 @@ mw.cx.TargetArticle.prototype.publishSuccess = function (response, jqXHR) {
 
 		this.translation.setTargetURL(targeturl);
 
-		var new_title = mdwiki_result.edit.title;
-		// mdwiki_result: {"warnings":{"main":{"*":"Unrecognized parameters: wpCaptchaId, wpCaptchaWord."}},"edit":{"new":"","result":"Success","pageid":9895285,"title":"مستخدم:Mr. Ibrahem/أوبلتوكسيماب","contentmodel":"wikitext","oldrevid":0,"newrevid":69736856,"newtimestamp":"2025-03-02T00:36:55Z","watched":""},"LinkToWikidata":{"error":"Cannot create link for namespace:2","nserror":"","qid":"Q7876570"}}
+		var new_title = wikipedia_result.edit.title;
+		// wikipedia_result: {"warnings":{"main":{"*":"Unrecognized parameters: wpCaptchaId, wpCaptchaWord."}},"edit":{"new":"","result":"Success","pageid":9895285,"title":"مستخدم:Mr. Ibrahem/أوبلتوكسيماب","contentmodel":"wikitext","oldrevid":0,"newrevid":69736856,"newtimestamp":"2025-03-02T00:36:55Z","watched":""},"LinkToWikidata":{"error":"Cannot create link for namespace:2","nserror":"","qid":"Q7876570"}}
 
 		var done = this.publishComplete(new_title || null);
 
 		if (this.sourceLanguage === "mdwiki") {
-			var title2 = new_title || this.getTargetTitle()
-			mw.cx.TargetArticle.prototype.addMdwikiLinks(this.targetLanguage, title2, qid, wd_result)
+			var title2 = new_title || this.getTargetTitle();
+			this.addMdwikiLinks(this.targetLanguage, title2, qid, wd_result);
+			// mw.cx.TargetArticle.prototype.addMdwikiLinks(this.targetLanguage, title2, qid, wd_result);
 		}
 
 		return done;
 	}
-
-	if (publishResult && publishResult.edit && publishResult.edit.captcha) {
+	const result_captcha = wikipedia_result.edit?.captcha || [];
+	if (result_captcha) {
 		// If there is a captcha challenge, get the solution and retry.
 		return this.loadCaptchaDialog().then(
-			this.showErrorCaptcha.bind(this, publishResult.edit.captcha)
+			this.showErrorCaptcha.bind(this, result_captcha)
 		);
 	}
-	const publish_Result = (mdwiki_result && mdwiki_result.length > 0)
-		? mdwiki_result
-		: publishResult;
+	const publish_Result = (wikipedia_result?.length > 0) ? wikipedia_result : publishResult;
 
 	// Any other failure
 	return this.publishFail('', {}, publish_Result, jqXHR);
