@@ -214,54 +214,69 @@ mw.cx.TargetArticle.prototype.publishSection = function () {
 mw.cx.TargetArticle.prototype.publishSuccess = function (response, jqXHR) {
 	const publishAction = this.translation.isSectionTranslation() ? 'cxpublishsection' : 'cxpublish';
 	const publishResult = response[publishAction];
-	console.log("publishResult:");
+	console.log("publishSuccess:");
 
-	if (publishResult.save_result_all) {
-		console.log("_____");
-		console.log("local result: " + JSON.stringify(publishResult.save_result_all.result));
-		console.log("mdwiki_result: " + JSON.stringify(publishResult.save_result_all.mdwiki_result));
+	// const mdwiki_result = publishResult?.mdwiki_result;
+	const wikipedia_result = publishResult?.wikipedia_result;
+
+	const wd_data = wikipedia_result.LinkToWikidata || publishResult.LinkToWikidata;
+
+	if (wikipedia_result) {
+		// console.log("local result: " + JSON.stringify(publishResult.local_result, null, 1));
+		// console.log("_____");
+		// ---
+		// const resultCopy = { ...wikipedia_result };
+		// delete resultCopy.LinkToWikidata;
+		// ---
+		const { LinkToWikidata, ...resultCopy } = wikipedia_result;
+		// ---
+		console.log("wikipedia_result:", JSON.stringify(resultCopy, null, 1));
 	} else {
-		console.log(JSON.stringify(publishResult));
+		console.log(JSON.stringify(publishResult, null, 1));
 	}
+	const result_success =
+		(wikipedia_result?.edit?.result ?? '').toLowerCase() === 'success' ||
+		(publishResult?.result ?? '').toLowerCase() === 'success';
+
 	// {"result":"error","edit":{"error":"noaccess","username":"Mr. Ibrahem"}}
-	if (publishResult.result === 'success') {
+	if (result_success) {
 		var targeturl = publishResult.targeturl;
 		if (this.sourceLanguage === "mdwiki" && publishResult.published_to != "local") {
 			targeturl = publishResult.targeturl_wiki;
 		}
-		var qid = "";
 		var wd_result = "";
-		if (publishResult.LinkToWikidata) {
-			qid = publishResult.LinkToWikidata.qid;
-			console.log('LinkToWikidata: ' + JSON.stringify(publishResult.LinkToWikidata));
+		var qid = "";
+		if (wd_data) {
+			qid = wd_data.qid;
+			console.log('LinkToWikidata: ' + JSON.stringify(wd_data, null, 1));
 			// LinkToWikidata: {"result":"success","qid":"Q474070"}
-			wd_result = publishResult.LinkToWikidata.result;
+			wd_result = wd_data.result;
 		}
 
 		this.translation.setTargetURL(targeturl);
 
-		var new_title = publishResult.save_result_all.mdwiki_result.edit.title;
-		// mdwiki_result: {"warnings":{"main":{"*":"Unrecognized parameters: wpCaptchaId, wpCaptchaWord."}},"edit":{"new":"","result":"Success","pageid":9895285,"title":"مستخدم:Mr. Ibrahem/أوبلتوكسيماب","contentmodel":"wikitext","oldrevid":0,"newrevid":69736856,"newtimestamp":"2025-03-02T00:36:55Z","watched":""},"LinkToWikidata":{"error":"Cannot create link for namespace:2","nserror":"","qid":"Q7876570"}}
+		var new_title = wikipedia_result?.edit?.title ?? null;
+		// wikipedia_result: {"warnings":{"main":{"*":"Unrecognized parameters: wpCaptchaId, wpCaptchaWord."}},"edit":{"new":"","result":"Success","pageid":9895285,"title":"مستخدم:Mr. Ibrahem/أوبلتوكسيماب","contentmodel":"wikitext","oldrevid":0,"newrevid":69736856,"newtimestamp":"2025-03-02T00:36:55Z","watched":""},"LinkToWikidata":{"error":"Cannot create link for namespace:2","nserror":"","qid":"Q7876570"}}
 
-		var done = this.publishComplete(new_title || null);
+		var done = this.publishComplete(new_title);
 
 		if (this.sourceLanguage === "mdwiki") {
-			var title2 = new_title || this.getTargetTitle()
-			mw.cx.TargetArticle.prototype.addMdwikiLinks(this.targetLanguage, title2, qid, wd_result)
+			var title2 = new_title || this.getTargetTitle();
+			this.addMdwikiLinks(this.targetLanguage, title2, qid, wd_result);
+			// mw.cx.TargetArticle.prototype.addMdwikiLinks(this.targetLanguage, title2, qid, wd_result);
 		}
 
 		return done;
 	}
-
-	if (publishResult && publishResult.edit && publishResult.edit.captcha) {
+	if (wikipedia_result?.edit?.captcha) {
 		// If there is a captcha challenge, get the solution and retry.
 		return this.loadCaptchaDialog().then(
-			this.showErrorCaptcha.bind(this, publishResult.edit.captcha)
+			this.showErrorCaptcha.bind(this, wikipedia_result.edit.captcha)
 		);
 	}
 
 	// Any other failure
-	return this.publishFail('', publishResult, publishResult, jqXHR);
+	return this.publishFail('', publishResult, wikipedia_result, jqXHR);
 };
 
 /**
@@ -288,6 +303,7 @@ mw.cx.TargetArticle.prototype.publishComplete = function (apiTargetTitle) {
  */
 mw.cx.TargetArticle.prototype.publishFail = function (errorCode, messageOrFailObjOrData, data, jqXHR) {
 	if (!data) {
+		mw.log.warn('[TD] publishFail no data');
 		if (errorCode === 'ok-but-empty') {
 			this.showPublishError(mw.msg('cx-publish-error-empty'));
 			return;
@@ -305,11 +321,11 @@ mw.cx.TargetArticle.prototype.publishFail = function (errorCode, messageOrFailOb
 		this.getTargetTitle(),
 		data
 	);
-	let mddx = "OAuth session expired, Please Log again to Translation Dashboard";
+	let mddx = "[TD] OAuth session expired, Please Log again to Translation Dashboard";
 	// cx-message-widget-message
 	let mddxlink = "OAuth session expired, Please Log again to <a href='https://mdwiki.toolforge.org/Translation_Dashboard/auth.php?a=login' target='_blank'>Translation Dashboard</a>";
 	// {"result":"error","edit":{"error":"noaccess","username":"Mr. Ibrahem"}}
-	if (data.edit.error) {
+	if (data?.edit?.error) {
 		if (data.edit.error === 'noaccess' || (data.edit.error && data.edit.error.code === 'noaccess')) {
 			this.showPublishError(mddx, "no access_keys in Translation_Dashboard");
 			// $('.cx-message-widget-message').html(mddxlink)
@@ -362,6 +378,12 @@ mw.cx.TargetArticle.prototype.publishFail = function (errorCode, messageOrFailOb
 			return;
 		} else if (editError.code === 'readonly') {
 			this.showUnrecoverablePublishError(mw.msg('cx-publish-error-readonly'), editError.readonlyreason);
+			return;
+		} else if (editError.code === 'protectedpage') {
+			this.showPublishError(
+				"The page: (" + this.getTargetTitle() + ") has been protected to prevent editing or other actions.",
+				""
+			);
 			return;
 		}
 	}
@@ -490,8 +512,9 @@ mw.cx.TargetArticle.prototype.showErrorException = function (failObj) {
  * @param {Object} jqXHR
  */
 mw.cx.TargetArticle.prototype.showErrorUnknown = function (editResult, data, jqXHR) {
-	const errorMsg = (editResult && editResult.info) || (data && data.error && data.error.info),
-		errorCode = (editResult && editResult.code) || (data && data.error && data.error.code);
+	const errorMsg = editResult?.info ?? data?.error?.info;
+	const errorCode = editResult?.code ?? data?.error?.code;
+
 	let unknown = 'Unknown error';
 
 	if (jqXHR && jqXHR.status !== 200) {
