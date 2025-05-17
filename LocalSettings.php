@@ -42,6 +42,28 @@ $wgContentTranslationCampaigns = [
     "Epilepsy" => true
 ];
 
+
+$wgContentTranslationSiteTemplates["cx"] = "https://cxserver.wikimedia.org/v1";
+
+$wgContentTranslationSiteTemplates = [
+    "view" => "//$1.wikipedia.org/wiki/$2",
+    "action" => "//$1.wikipedia.org/w/index.php?title=$2",
+    "api" => "//$1.wikipedia.org/w/api.php",
+    "cx" => "https://cxserver.wikimedia.org/v1",
+    "cookieDomain" => null,
+    "unlinkedrestbase" => "//$1.wikipedia.org/api/rest_v1"
+];
+
+$wgContentTranslationSiteTemplates_mdwiki = [
+    "view" => "//mdwiki.org/wiki/$2",
+    "action" => "//mdwiki.org/w/index.php?title=$2",
+    "api" => "//medwiki.toolforge.org/mdwiki_api.php",
+    "cx" => "https://cxserver.wikimedia.org/v1",
+    "cookieDomain" => null,
+    "unlinkedrestbase" => "//mdwiki.org/api/rest_v1"
+];
+
+
 $wgResourceModules["mw.cx.init"]["scripts"][] = "mw.cx.TranslationMdwiki.js";
 
 $wgResourceModules['mw.cx.SiteMapper']['packageFiles'][1]['config']['SiteTemplates_mdwiki'] = 'ContentTranslationSiteTemplates_mdwiki';
@@ -66,21 +88,3 @@ $wgResourceModules['mw.cx.SiteMapper']['packageFiles'][1]['config']['SiteTemplat
 
 
 // not yet in LocalSettings.php
-
-$wgContentTranslationSiteTemplates = [
-    "view" => "//$1.wikipedia.org/wiki/$2",
-    "action" => "//$1.wikipedia.org/w/index.php?title=$2",
-    "api" => "//$1.wikipedia.org/w/api.php",
-    "cx" => "https://cxserver.wikimedia.org/v1",
-    "cookieDomain" => null,
-    "unlinkedrestbase" => "//$1.wikipedia.org/api/rest_v1"
-];
-
-$ContentTranslationSiteTemplates_mdwiki = [
-    "view" => "//mdwiki.org/wiki/$2",
-    "action" => "//mdwiki.org/w/index.php?title=$2",
-    "api" => "//medwiki.toolforge.org/mdwiki_api.php",
-    "cx" => "https://cxserver.wikimedia.org/v1",
-    "cookieDomain" => null,
-    "unlinkedrestbase" => "//mdwiki.org/api/rest_v1"
-];
