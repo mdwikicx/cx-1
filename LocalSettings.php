@@ -42,6 +42,28 @@ $wgContentTranslationCampaigns = [
     "Epilepsy" => true
 ];
 
+$wgResourceModules["mw.cx.init"]["scripts"][] = "mw.cx.TranslationMdwiki.js";
+
+$wgResourceModules['mw.cx.SiteMapper']['packageFiles'][1]['config']['SiteTemplates_mdwiki'] = 'ContentTranslationSiteTemplates_mdwiki';
+
+
+/*
+"mw.cx.SiteMapper": {
+			"packageFiles": [
+				"base/mw.cx.SiteMapper.js",
+				{
+					"name": "config.json",
+					"config": {
+						"DomainCodeMapping": "ContentTranslationDomainCodeMapping",
+						"SiteTemplates": "ContentTranslationSiteTemplates",
+						"SiteTemplates_mdwiki": "ContentTranslationSiteTemplates_mdwiki",
+						"TranslateInTarget": "ContentTranslationTranslateInTarget"
+					}
+				}
+			]
+*/
+// $wgResourceModules["mw.cx.SiteMapper"]["packageFiles"]
+
 
 // not yet in LocalSettings.php
 
