@@ -8,7 +8,6 @@ $wgContentTranslationCXServerAuth;
 $wgContentTranslationEnableAnonSectionTranslation;
 $wgContentTranslationExcludedNamespaces;
 $wgContentTranslationCluster;
-$wgContentTranslationAsBetaFeature;
 $wgContentTranslationTranslateInTarget;
 $wgContentTranslationDevMode;
 $wgRecommendToolAPIURL;
@@ -17,9 +16,7 @@ $AutomaticTranslationLanguageSearcherEntrypointEnabledLanguages;
 $wgContentTranslationEnableUnifiedDashboard;
 $wgSectionTranslationTargetLanguages;
 
-$wgContentTranslationUnmodifiedMTThresholdForPublish;
 $wgContentTranslationVersion;
-$wgContentTranslationCampaigns;
 $wgContentTranslationDatabase;
 
 
