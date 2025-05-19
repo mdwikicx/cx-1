@@ -377,7 +377,7 @@
 				"view": "//$1.wikipedia.org/wiki/$2",
 				"action": "//$1.wikipedia.org/w/index.php?title=$2",
 				"api": "//$1.wikipedia.org/w/api.php",
-				"cx": "https://cxserver.wikimedia.org/v1",
+				"cx": "http://localhost:8080/v1",
 				"cookieDomain": null,
 				"restbase": "//$1.wikipedia.org/api/rest_v1"
 			}
@@ -388,7 +388,7 @@
 		},
 		"ContentTranslationAsBetaFeature": {
 			"description": "Whether to have CX available only as a beta feature and only shown to the users who have enabled the beta feature.",
-			"value": false
+			"value": true
 		},
 		"ContentTranslationTargetNamespace": {
 			"description": "Target namespace to publish articles. Values can be valid namespace ids. Example: 0 for Main, 2 for User namespace",
@@ -428,7 +428,7 @@
 		},
 		"ContentTranslationUnmodifiedMTThresholdForPublish": {
 			"description": "If the user exceeds a threshold an error will be shown to the user when they try to publish. The threshold will be calculated for the whole document, and it will prevent publishing until the content is modified.",
-			"value": 100
+			"value": 95
 		},
 		"ContentTranslationPublishRequirements": {
 			"description": "List of requirements for user account to be able to publish in main namespace. Possible requirements: * userGroups: User should belong to any group in this list in order to be able to publish.",
