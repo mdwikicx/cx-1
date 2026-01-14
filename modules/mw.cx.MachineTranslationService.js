@@ -68,7 +68,7 @@ mw.cx.MachineTranslationService.prototype.getSuggestedTitle = function (title) {
 		};
 
 		return $.ajax(request).then(function (response) {
-			return response.targetTitle;
+			return response.targetTitle || '';
 		});
 	};
 
