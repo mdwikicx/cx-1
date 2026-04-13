@@ -219,7 +219,7 @@ mw.cx.TargetArticle.prototype.publishSuccess = function (response, jqXHR) {
 	// const mdwiki_result = publishResult?.mdwiki_result;
 	const wikipedia_result = publishResult?.wikipedia_result;
 
-	const wd_data = wikipedia_result.LinkToWikidata || publishResult.LinkToWikidata;
+	const wd_data = wikipedia_result.LinkToWikidata || publishResult.LinkToWikidata || [];
 
 	if (wikipedia_result) {
 		// console.log("local result: " + JSON.stringify(publishResult.local_result, null, 1));
@@ -244,14 +244,6 @@ mw.cx.TargetArticle.prototype.publishSuccess = function (response, jqXHR) {
 		if (this.sourceLanguage === "mdwiki" && publishResult.published_to != "local") {
 			targeturl = publishResult.targeturl_wiki;
 		}
-		var wd_result = "";
-		var qid = "";
-		if (wd_data) {
-			qid = wd_data.qid;
-			console.log('LinkToWikidata: ' + JSON.stringify(wd_data, null, 1));
-			// LinkToWikidata: {"result":"success","qid":"Q474070"}
-			wd_result = wd_data.result;
-		}
 
 		this.translation.setTargetURL(targeturl);
 
@@ -262,8 +254,7 @@ mw.cx.TargetArticle.prototype.publishSuccess = function (response, jqXHR) {
 
 		if (this.sourceLanguage === "mdwiki") {
 			var title2 = new_title || this.getTargetTitle();
-			this.addMdwikiLinks(this.targetLanguage, title2, qid, wd_result);
-			// mw.cx.TargetArticle.prototype.addMdwikiLinks(this.targetLanguage, title2, qid, wd_result);
+			this.addMdwikiLinks(this.targetLanguage, title2, wd_data);
 		}
 
 		return done;
@@ -707,7 +698,7 @@ mw.cx.TargetArticle.prototype.getTags = function (hasTooMuchUnmodifiedText) {
 	return tagString;
 };
 
-mw.cx.TargetArticle.prototype.addMdwikiLinks = function (targetLanguage, targetTitle, qid, wd_result) {
+mw.cx.TargetArticle.prototype.addMdwikiLinks = function (targetLanguage, targetTitle, wd_data) {
 	const pp = {
 		lang: targetLanguage,
 		title: targetTitle,
@@ -715,6 +706,11 @@ mw.cx.TargetArticle.prototype.addMdwikiLinks = function (targetLanguage, targetT
 	};
 	var url = "https://mdwiki.toolforge.org/fixwikirefs.php?" + $.param(pp);
 	let link = `<a href='${url}' target='_blank'>Fix References</a>`
+
+	var wd_result = wd_data.result ?? '';
+	var qid = wd_data.qid ?? '';
+	// var wd_data_error = wd_data.error ?? '';
+	console.log('LinkToWikidata: ' + JSON.stringify(wd_data, null, 1));
 
 	var wdlink = "";
 	if (qid != "" && qid != "undefined" && wd_result != "success") {
