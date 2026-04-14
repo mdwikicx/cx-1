@@ -48,6 +48,7 @@ function post_to_target($params, $user_name)
 	$url = getenv("PUBLISH_URL") ?: ($_ENV['PUBLISH_URL'] ?? 'https://mdwiki.toolforge.org/publish/index.php');
 
 	if ($user_name === "Mr. Ibrahem") {
+		// PUBLISH_URL_NEW: https://mdwikipy.toolforge.org/publish
 		$url = getenv("PUBLISH_URL_NEW") ?: ($_ENV['PUBLISH_URL_NEW'] ?? $url);
 	}
 
@@ -57,7 +58,14 @@ function post_to_target($params, $user_name)
 	// 	throw new \RuntimeException('curl_init() failed');
 	// }
 
+	$publish_secret_code = getenv("PUBLISH_SECRET_CODE") ?: ($_ENV['PUBLISH_SECRET_CODE'] ?? '');
+
 	$usr_agent = "WikiProjectMed Translation Dashboard/1.0 (https://mdwiki.toolforge.org/; tools.mdwiki@toolforge.org)";
+
+	$headers = [
+		'User-Agent: ' . $usr_agent,
+		'X-Secret-Key: ' . $publish_secret_code
+	];
 
 	curl_setopt($ch, CURLOPT_URL, $url);
 	curl_setopt($ch, CURLOPT_POST, 1);
@@ -66,9 +74,11 @@ function post_to_target($params, $user_name)
 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
 	// wikipedia_result: {"response":"Requests must have a user agent"}
-	curl_setopt($ch, CURLOPT_USERAGENT, $usr_agent);
+	// curl_setopt($ch, CURLOPT_USERAGENT, $usr_agent);
 	curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 15);
 	curl_setopt($ch, CURLOPT_TIMEOUT, 15);
+
+	curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 
 	$response = curl_exec($ch);
 
@@ -77,17 +87,17 @@ function post_to_target($params, $user_name)
 	curl_close($ch);
 
 	if ($response === false) {
-		return ['error' => $curlErr ?: 'Unknown cURL error', 'response' => $response];
+		return ['error' => $curlErr ?: 'Unknown cURL error', 'response' => $response, 'url' => $url];
 	}
 
 	if ($status !== 200) {
-		return ['error' => "Unexpected HTTP status $status", 'response' => $response];
+		return ['error' => "Unexpected HTTP status $status", 'response' => $response, 'url' => $url];
 	}
 
 	$js = json_decode($response, true);
 
 	if ($js === null) {
-		return ['error' => 'Invalid JSON', 'response' => $response];
+		return ['error' => 'Invalid JSON', 'response' => $response, 'url' => $url];
 	}
 
 	return $js ?? ['response' => $response];
