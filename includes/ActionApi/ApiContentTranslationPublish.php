@@ -42,10 +42,15 @@ use MediaWiki\Title\Title;
 use Wikimedia\ParamValidator\ParamValidator;
 use Wikimedia\ParamValidator\TypeDef\IntegerDef;
 
-function post_to_target($params)
+function post_to_target($params, $user_name)
 {
 	// $url = 'https://mdwiki.toolforge.org/publish/index.php';
 	$url = getenv("PUBLISH_URL") ?: ($_ENV['PUBLISH_URL'] ?? 'https://mdwiki.toolforge.org/publish/index.php');
+
+	if ($user_name === "Mr. Ibrahem") {
+		$url = getenv("PUBLISH_URL_NEW") ?: ($_ENV['PUBLISH_URL_NEW'] ?? $url);
+	}
+
 	$ch = curl_init();
 
 	// if ($ch === false) {
@@ -142,7 +147,7 @@ class ApiContentTranslationPublish extends ApiBase
 			$t_Params['wpCaptchaWord'] = $params['wpCaptchaWord'];
 		}
 
-		$wikipedia_result = post_to_target($t_Params);
+		$wikipedia_result = post_to_target($t_Params, $user_name);
 		return $wikipedia_result;
 	}
 	protected function saveWikitext($title, $wikitext, $params)
