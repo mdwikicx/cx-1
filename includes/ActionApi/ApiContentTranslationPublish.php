@@ -44,8 +44,8 @@ use Wikimedia\ParamValidator\TypeDef\IntegerDef;
 
 function post_to_target($params)
 {
-	// $url = 'https://mdwiki.toolforge.org/Translation_Dashboard/publish/index.php';
-	$url = 'https://mdwiki.toolforge.org/publish/index.php';
+	// $url = 'https://mdwiki.toolforge.org/publish/index.php';
+	$url = getenv("PUBLISH_URL") ?: ($_ENV['PUBLISH_URL'] ?? 'https://mdwiki.toolforge.org/publish/index.php');
 	$ch = curl_init();
 
 	// if ($ch === false) {
