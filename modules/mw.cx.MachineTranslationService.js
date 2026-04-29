@@ -211,9 +211,11 @@ mw.cx.MachineTranslationService.prototype.fetchCXServerToken_MDWIKI_issue = func
 			return response.json();
 		})
 		.then((data) => {
-			if (data.error && data.error.code === "no access") {
-				// mw.hook('mw.cx.error').fire('Unable to fetch cxtoken. !! ');
-				mw.cx.MachineTranslationService.prototype.cxtoken_error();
+			if (data?.error) {
+				if (data.error?.code === "no access") {
+					// mw.hook('mw.cx.error').fire('Unable to fetch cxtoken. !! ');
+					mw.cx.MachineTranslationService.prototype.cxtoken_error();
+				}
 				console.log('Fetch failed:', data);
 			} else {
 				console.log('Fetch successful:', data);
