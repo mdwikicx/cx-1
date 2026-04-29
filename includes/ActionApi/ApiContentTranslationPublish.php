@@ -41,7 +41,8 @@ use MediaWiki\Request\DerivativeRequest;
 use MediaWiki\Title\Title;
 use Wikimedia\ParamValidator\ParamValidator;
 use Wikimedia\ParamValidator\TypeDef\IntegerDef;
-function post_to_target2($params, $url)
+
+function post_to_target_new($params, $url)
 {
 	$ch = curl_init();
 
@@ -94,7 +95,7 @@ function post_to_target2($params, $url)
 	return $js ?? ['response' => $response];
 }
 
-function post_to_target1($params, $url)
+function post_to_target_legacy($params, $url)
 {
 	// $url = 'https://mdwiki.toolforge.org/publish/index.php';
 	$url = getenv("PUBLISH_URL") ?: ($_ENV['PUBLISH_URL'] ?? 'https://mdwiki.toolforge.org/publish/index.php');
@@ -155,10 +156,10 @@ function post_to_target($params, $user_name)
 		$url_before = $url;
 		$url = getenv("PUBLISH_URL_NEW") ?: ($_ENV['PUBLISH_URL_NEW'] ?? $url);
 		if ($url !== $url_before) {
-			return post_to_target2($params, $url);
+			return post_to_target_new($params, $url);
 		}
 	}
-	return post_to_target1($params, $url);
+	return post_to_target_legacy($params, $url);
 }
 
 class ApiContentTranslationPublish extends ApiBase

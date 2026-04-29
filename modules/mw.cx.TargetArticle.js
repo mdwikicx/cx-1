@@ -315,6 +315,8 @@ mw.cx.TargetArticle.prototype.publishFail = function (errorCode, messageOrFailOb
 	let mddx = "[TD] OAuth session expired, Please Log again to Translation Dashboard";
 	// cx-message-widget-message
 	let mddxlink = "OAuth session expired, Please Log again to <a href='https://mdwiki.toolforge.org/Translation_Dashboard/auth.php?a=login' target='_blank'>Translation Dashboard</a>";
+	const editError = data.error;
+
 	// {"result":"error","edit":{"error":"noaccess","username":"Mr. Ibrahem"}}
 	if (data?.edit?.error) {
 		let noaccess_errors = [
@@ -340,7 +342,6 @@ mw.cx.TargetArticle.prototype.publishFail = function (errorCode, messageOrFailOb
 		}
 	}
 
-	const editError = data.error;
 	if (editError) {
 		// Handle spam blacklist error (either from core or from Extension:SpamBlacklist)
 		// Example of API result - https://phabricator.wikimedia.org/P8991
