@@ -317,7 +317,12 @@ mw.cx.TargetArticle.prototype.publishFail = function (errorCode, messageOrFailOb
 	let mddxlink = "OAuth session expired, Please Log again to <a href='https://mdwiki.toolforge.org/Translation_Dashboard/auth.php?a=login' target='_blank'>Translation Dashboard</a>";
 	// {"result":"error","edit":{"error":"noaccess","username":"Mr. Ibrahem"}}
 	if (data?.edit?.error) {
-		if (data.edit.error === 'noaccess' || (data.edit.error && data.edit.error.code === 'noaccess')) {
+		let noaccess_errors = [
+			"mwoauth-invalid-authorization",
+			"noaccess",
+			"no access",
+		];
+		if (noaccess_errors.includes(data.edit.error) || (data.edit.error && noaccess_errors.includes(data.edit.error.code))) {
 			this.showPublishError(mddx, "no access_keys in Translation_Dashboard");
 			// $('.cx-message-widget-message').html(mddxlink)
 			$('.cx-message-widget-message')
