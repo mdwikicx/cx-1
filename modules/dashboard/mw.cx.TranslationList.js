@@ -153,7 +153,7 @@ mw.cx.CXTranslationList.prototype.loadItems = function () {
 			$( window ).off( 'scroll' );
 			self.constructor.static.showLoginDialog();
 		}
-	} ).always( function () {
+	} ).finally( function () {
 		self.pendingRequests--;
 
 		if ( self.pendingRequests === 0 ) {

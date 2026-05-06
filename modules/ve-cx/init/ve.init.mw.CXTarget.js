@@ -825,7 +825,7 @@ ve.init.mw.CXTarget.prototype.onDocumentActivatePlaceholder = function ( placeho
 		return this.MTManager.getDefaultNonMTProvider().then( function ( provider ) {
 			return this.changeContentSource( model, null, provider );
 		}.bind( this ) );
-	}.bind( this ) ).always( function () {
+	}.bind( this ) ).finally( function () {
 		const $sourceElement = this.getSourceSectionElement( cxid );
 		$sourceElement.removeClass( 'cx-section-highlight' );
 		const sectionNode = this.getTargetSectionNode( cxid );

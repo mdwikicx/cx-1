@@ -300,7 +300,7 @@ mw.cx.ui.PageSelectorWidget.prototype.populateSuggestions = function () {
 		};
 	} ).fail( function ( error ) {
 		mw.log( 'Error getting page data. ' + error );
-	} ).always( function () {
+	} ).finally( function () {
 		self.populateLookupMenu();
 		self.popPending();
 	} );
