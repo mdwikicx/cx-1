@@ -71,7 +71,7 @@ ve.ui.CXTranslationAction.prototype.translate = function ( source ) {
 	}
 
 	promise
-		.finally( function () {
+		.always( function () {
 			// Recalculate the section, since the instance got destroyed in content change
 			section = target.getTargetSectionNode( section.getSectionId() );
 			if ( section ) {

@@ -169,7 +169,7 @@ mw.cx.CXSuggestionList.prototype.loadItems = function ( list ) {
 		}
 
 		return isEmpty;
-	} ).finally( () => {
+	} ).always( () => {
 		this.pendingRequests--;
 
 		if ( this.pendingRequests === 0 ) {
