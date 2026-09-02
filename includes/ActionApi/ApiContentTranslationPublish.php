@@ -42,28 +42,35 @@ use MediaWiki\Title\Title;
 use Wikimedia\ParamValidator\ParamValidator;
 use Wikimedia\ParamValidator\TypeDef\IntegerDef;
 
-function post_to_target($params)
+function post_to_target_new($params, $url)
 {
-	// $url = 'https://mdwiki.toolforge.org/Translation_Dashboard/publish/index.php';
-	$url = 'https://mdwiki.toolforge.org/publish/index.php';
 	$ch = curl_init();
 
-	// if ($ch === false) {
-	// 	throw new \RuntimeException('curl_init() failed');
-	// }
+	$publish_secret_code = getenv("PUBLISH_SECRET_CODE") ?: ($_ENV['PUBLISH_SECRET_CODE'] ?? '');
 
 	$usr_agent = "WikiProjectMed Translation Dashboard/1.0 (https://mdwiki.toolforge.org/; tools.mdwiki@toolforge.org)";
 
+	$payload = json_encode($params);
+
+	$headers = [
+		'User-Agent: ' . $usr_agent,
+		'X-Secret-Key: ' . $publish_secret_code,
+		'Content-Type: application/json',
+		'Content-Length: ' . strlen($payload),
+	];
+
 	curl_setopt($ch, CURLOPT_URL, $url);
 	curl_setopt($ch, CURLOPT_POST, 1);
-	curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($params));
+	curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
 
 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
 	// wikipedia_result: {"response":"Requests must have a user agent"}
-	curl_setopt($ch, CURLOPT_USERAGENT, $usr_agent);
+	// curl_setopt($ch, CURLOPT_USERAGENT, $usr_agent);
 	curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 15);
 	curl_setopt($ch, CURLOPT_TIMEOUT, 15);
+
+	curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 
 	$response = curl_exec($ch);
 
@@ -72,20 +79,87 @@ function post_to_target($params)
 	curl_close($ch);
 
 	if ($response === false) {
-		return ['error' => $curlErr ?: 'Unknown cURL error', 'response' => $response];
+		return ['error' => $curlErr ?: 'Unknown cURL error', 'response' => $response, 'url' => $url];
 	}
 
 	if ($status !== 200) {
-		return ['error' => "Unexpected HTTP status $status", 'response' => $response];
+		return ['error' => "Unexpected HTTP status $status", 'response' => $response, 'url' => $url];
 	}
 
 	$js = json_decode($response, true);
 
 	if ($js === null) {
-		return ['error' => 'Invalid JSON', 'response' => $response];
+		return ['error' => 'Invalid JSON', 'response' => $response, 'url' => $url];
 	}
 
 	return $js ?? ['response' => $response];
+}
+
+function post_to_target_legacy($params, $url)
+{
+	// $url = 'https://mdwiki.toolforge.org/publish/index.php';
+	$url = getenv("PUBLISH_URL") ?: ($_ENV['PUBLISH_URL'] ?? 'https://mdwiki.toolforge.org/publish/index.php');
+
+	$ch = curl_init();
+
+	$publish_secret_code = getenv("PUBLISH_SECRET_CODE") ?: ($_ENV['PUBLISH_SECRET_CODE'] ?? '');
+
+	$usr_agent = "WikiProjectMed Translation Dashboard/1.0 (https://mdwiki.toolforge.org/; tools.mdwiki@toolforge.org)";
+
+	$headers = [
+		'User-Agent: ' . $usr_agent,
+		'X-Secret-Key: ' . $publish_secret_code
+	];
+
+	curl_setopt($ch, CURLOPT_URL, $url);
+	curl_setopt($ch, CURLOPT_POST, 1);
+	curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($params));
+
+	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+	// wikipedia_result: {"response":"Requests must have a user agent"}
+	// curl_setopt($ch, CURLOPT_USERAGENT, $usr_agent);
+	curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 15);
+	curl_setopt($ch, CURLOPT_TIMEOUT, 15);
+
+	curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+
+	$response = curl_exec($ch);
+
+	$curlErr   = curl_error($ch);
+	$status    = curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
+	curl_close($ch);
+
+	if ($response === false) {
+		return ['error' => $curlErr ?: 'Unknown cURL error', 'response' => $response, 'url' => $url];
+	}
+
+	if ($status !== 200) {
+		return ['error' => "Unexpected HTTP status $status", 'response' => $response, 'url' => $url];
+	}
+
+	$js = json_decode($response, true);
+
+	if ($js === null) {
+		return ['error' => 'Invalid JSON', 'response' => $response, 'url' => $url];
+	}
+
+	return $js ?? ['response' => $response];
+}
+
+function post_to_target($params, $user_name)
+{
+	// $url = 'https://mdwiki.toolforge.org/publish/index.php';
+	$url = getenv("PUBLISH_URL") ?: ($_ENV['PUBLISH_URL'] ?? 'https://mdwiki.toolforge.org/publish/index.php');
+
+	if ($user_name === "Mr. Ibrahem") {
+		$url_before = $url;
+		$url = getenv("PUBLISH_URL_NEW") ?: ($_ENV['PUBLISH_URL_NEW'] ?? $url);
+		if ($url !== $url_before) {
+			return post_to_target_new($params, $url);
+		}
+	}
+	return post_to_target_legacy($params, $url);
 }
 
 class ApiContentTranslationPublish extends ApiBase
@@ -142,7 +216,7 @@ class ApiContentTranslationPublish extends ApiBase
 			$t_Params['wpCaptchaWord'] = $params['wpCaptchaWord'];
 		}
 
-		$wikipedia_result = post_to_target($t_Params);
+		$wikipedia_result = post_to_target($t_Params, $user_name);
 		return $wikipedia_result;
 	}
 	protected function saveWikitext($title, $wikitext, $params)
