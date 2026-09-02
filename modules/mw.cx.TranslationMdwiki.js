@@ -248,8 +248,8 @@ async function get_new_html_2025(title, tr_type) {
 	// ---
 	let host = (window.location.hostname === "mdwikicx.toolforge.org") ? window.location.hostname : "medwiki.toolforge.org";
 	// ---
-	// const url = `https://${host}/new_html_1/index.php?${$.param(params)}`;
-	const url = `https://${host}/new_html/index.php?${$.param(params)}`;
+	// const url = `https://${host}/new_html/index.php?${$.param(params)}`;
+	const url = `https://${host}/new_html_1/index.php?${$.param(params)}`;
 	// ---
 	return await fetchJson(url);
 }
