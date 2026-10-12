@@ -42,22 +42,9 @@ use MediaWiki\Title\Title;
 use Wikimedia\ParamValidator\ParamValidator;
 use Wikimedia\ParamValidator\TypeDef\IntegerDef;
 
-function post_to_target_new($params, $url)
+function sendPostRequest($payload, $url, $headers)
 {
 	$ch = curl_init();
-
-	$publish_secret_code = getenv("PUBLISH_SECRET_CODE") ?: ($_ENV['PUBLISH_SECRET_CODE'] ?? '');
-
-	$usr_agent = "WikiProjectMed Translation Dashboard/1.0 (https://mdwiki.toolforge.org/; tools.mdwiki@toolforge.org)";
-
-	$payload = json_encode($params);
-
-	$headers = [
-		'User-Agent: ' . $usr_agent,
-		'X-Secret-Key: ' . $publish_secret_code,
-		'Content-Type: application/json',
-		'Content-Length: ' . strlen($payload),
-	];
 
 	curl_setopt($ch, CURLOPT_URL, $url);
 	curl_setopt($ch, CURLOPT_POST, 1);
@@ -74,60 +61,8 @@ function post_to_target_new($params, $url)
 
 	$response = curl_exec($ch);
 
-	$curlErr   = curl_error($ch);
-	$status    = curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
-	curl_close($ch);
-
-	if ($response === false) {
-		return ['error' => $curlErr ?: 'Unknown cURL error', 'response' => $response, 'url' => $url];
-	}
-
-	if ($status !== 200) {
-		return ['error' => "Unexpected HTTP status $status", 'response' => $response, 'url' => $url];
-	}
-
-	$js = json_decode($response, true);
-
-	if ($js === null) {
-		return ['error' => 'Invalid JSON', 'response' => $response, 'url' => $url];
-	}
-
-	return $js ?? ['response' => $response];
-}
-
-function post_to_target_legacy($params, $url)
-{
-	// $url = 'https://mdwiki.toolforge.org/publish/index.php';
-	$url = getenv("PUBLISH_URL") ?: ($_ENV['PUBLISH_URL'] ?? 'https://mdwiki.toolforge.org/publish/index.php');
-
-	$ch = curl_init();
-
-	$publish_secret_code = getenv("PUBLISH_SECRET_CODE") ?: ($_ENV['PUBLISH_SECRET_CODE'] ?? '');
-
-	$usr_agent = "WikiProjectMed Translation Dashboard/1.0 (https://mdwiki.toolforge.org/; tools.mdwiki@toolforge.org)";
-
-	$headers = [
-		'User-Agent: ' . $usr_agent,
-		'X-Secret-Key: ' . $publish_secret_code
-	];
-
-	curl_setopt($ch, CURLOPT_URL, $url);
-	curl_setopt($ch, CURLOPT_POST, 1);
-	curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($params));
-
-	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-
-	// wikipedia_result: {"response":"Requests must have a user agent"}
-	// curl_setopt($ch, CURLOPT_USERAGENT, $usr_agent);
-	curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 15);
-	curl_setopt($ch, CURLOPT_TIMEOUT, 15);
-
-	curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-
-	$response = curl_exec($ch);
-
-	$curlErr   = curl_error($ch);
-	$status    = curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
+	$curlErr = curl_error($ch);
+	$status = curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
 	curl_close($ch);
 
 	if ($response === false) {
@@ -152,25 +87,39 @@ function post_to_target($params, $user_name)
 	// $url = 'https://mdwiki.toolforge.org/publish/index.php';
 	$url = getenv("PUBLISH_URL") ?: ($_ENV['PUBLISH_URL'] ?? 'https://mdwiki.toolforge.org/publish/index.php');
 
+	$publish_secret_code = getenv("PUBLISH_SECRET_CODE") ?: ($_ENV['PUBLISH_SECRET_CODE'] ?? '');
+
+	$usr_agent = "WikiProjectMed Translation Dashboard/1.0 (https://mdwiki.toolforge.org/; tools.mdwiki@toolforge.org)";
+
+	$headers = [
+		'User-Agent: ' . $usr_agent,
+		'X-Secret-Key: ' . $publish_secret_code,
+		'Content-Type: application/json',
+	];
+
 	if ($user_name === "Mr. Ibrahem") {
 		$url_before = $url;
 		$url = getenv("PUBLISH_URL_NEW") ?: ($_ENV['PUBLISH_URL_NEW'] ?? $url);
 		if ($url !== $url_before) {
-			return post_to_target_new($params, $url);
+			$payload = json_encode($params);
+			$headers[] = 'Content-Length: ' . strlen($payload);
+			return sendPostRequest($payload, $url, $headers);
 		}
 	}
-	return post_to_target_legacy($params, $url);
+
+	$payload = http_build_query($params);
+	return sendPostRequest($payload, $url, $headers);
 }
 
 class ApiContentTranslationPublish extends ApiBase
 {
 
-	protected ParsoidClientFactory $parsoidClientFactory;
-	protected ?Translation $translation;
-	private LanguageFactory $languageFactory;
+	protected ParsoidClientFactory      $parsoidClientFactory;
+	protected ?Translation              $translation;
+	private LanguageFactory             $languageFactory;
 	private IBufferingStatsdDataFactory $statsdDataFactory;
-	private LanguageNameUtils $languageNameUtils;
-	private TranslationStore $translationStore;
+	private LanguageNameUtils           $languageNameUtils;
+	private TranslationStore            $translationStore;
 	private TranslationTargetUrlCreator $targetUrlCreator;
 
 	public function __construct(
@@ -200,13 +149,13 @@ class ApiContentTranslationPublish extends ApiBase
 	protected function publishToMdwiki($title, $wikitext, $params, $sourceRevisionId, $summary, $user_name)
 	{
 		$t_Params = [
-			'title' => $title->getPrefixedDBkey(),
-			'revid' => $sourceRevisionId,
-			'text' => $wikitext,
-			'user' => $user_name,
-			'summary' => $summary,
-			'target' => $params['to'],
-			'campaign' => $params['campaign'] ?? '',
+			'title'       => $title->getPrefixedDBkey(),
+			'revid'       => $sourceRevisionId,
+			'text'        => $wikitext,
+			'user'        => $user_name,
+			'summary'     => $summary,
+			'target'      => $params['to'],
+			'campaign'    => $params['campaign'] ?? '',
 			'sourcetitle' => $params['sourcetitle'],
 		];
 
@@ -265,9 +214,9 @@ class ApiContentTranslationPublish extends ApiBase
 		}
 
 		$apiParams = [
-			'action' => 'edit',
-			'title' => ($params['from'] === 'mdwiki') ? $params['to'] . "/" . $params['sourcetitle'] : $title->getPrefixedDBkey(),
-			'text' => $wikitext,
+			'action'  => 'edit',
+			'title'   => ($params['from'] === 'mdwiki') ? $params['to'] . "/" . $params['sourcetitle'] : $title->getPrefixedDBkey(),
+			'text'    => $wikitext,
 			'summary' => $summary,
 		];
 
@@ -287,7 +236,7 @@ class ApiContentTranslationPublish extends ApiBase
 		// if ( $params['from'] === "mdwiki") return $wikipedia_result;
 
 		return [
-			'local_result' => $result,
+			'local_result'     => $result,
 			'wikipedia_result' => $wikipedia_result,
 		];
 	}
@@ -432,7 +381,7 @@ class ApiContentTranslationPublish extends ApiBase
 
 		if ($params['from'] === "mdwiki") {
 			$saveresult = $saveresult_all['wikipedia_result'] ?? [];
-		};
+		}
 
 		$save_edit = $saveresult['edit'] ?? [];
 		$editStatus = $saveresult['edit']['result'] ?? [];
@@ -450,15 +399,15 @@ class ApiContentTranslationPublish extends ApiBase
 
 			if ($params['from'] === "mdwiki") {
 				$title2 = $params['to'] . "/" . $params['sourcetitle'];
-			};
+			}
 
 			$targetURL = $this->targetUrlCreator->createTargetUrl($title2, $params['to']);
 			$targeturl_wiki = SiteMapper::getPageURL($params['to'], $targetTitle->getPrefixedDBkey());
 			$result = [
-				'result' => 'success',
-				'targeturl' => $targetURL,
+				'result'         => 'success',
+				'targeturl'      => $targetURL,
 				'targeturl_wiki' => $targeturl_wiki,
-				'published_to' => $this->published_to
+				'published_to'   => $this->published_to
 			];
 
 			// if (is_array($saveresult) && isset($saveresult['LinkToWikidata'])) $result['LinkToWikidata'] = $saveresult['LinkToWikidata'];
@@ -479,7 +428,7 @@ class ApiContentTranslationPublish extends ApiBase
 		} else {
 			$result = [
 				'result' => 'error',
-				'edit' => $save_edit ?? []
+				'edit'   => $save_edit ?? []
 			];
 		}
 
@@ -529,35 +478,35 @@ class ApiContentTranslationPublish extends ApiBase
 	public function getAllowedParams()
 	{
 		return [
-			'title' => [
+			'title'         => [
 				ParamValidator::PARAM_REQUIRED => true,
 			],
-			'html' => [
+			'html'          => [
 				ParamValidator::PARAM_REQUIRED => true,
 			],
-			'from' => [
+			'from'          => [
 				ParamValidator::PARAM_REQUIRED => true,
 			],
-			'to' => [
+			'to'            => [
 				ParamValidator::PARAM_REQUIRED => true,
 			],
-			'sourcetitle' => [
+			'sourcetitle'   => [
 				ParamValidator::PARAM_REQUIRED => true,
 			],
-			'categories' => null,
-			'publishtags' => [
+			'categories'    => null,
+			'publishtags'   => [
 				ParamValidator::PARAM_ISMULTI => true,
 			],
 			/** @todo These should be renamed to something all-lowercase and lacking a "wp" prefix */
-			'campaign' => null,
-			'wpCaptchaId' => null,
+			'campaign'      => null,
+			'wpCaptchaId'   => null,
 			'wpCaptchaWord' => null,
-			'cxversion' => [
-				ParamValidator::PARAM_TYPE => 'integer',
+			'cxversion'     => [
+				ParamValidator::PARAM_TYPE     => 'integer',
 				ParamValidator::PARAM_REQUIRED => true,
-				ApiBase::PARAM_RANGE_ENFORCE => true,
-				IntegerDef::PARAM_MIN => 1,
-				IntegerDef::PARAM_MAX => 2,
+				ApiBase::PARAM_RANGE_ENFORCE   => true,
+				IntegerDef::PARAM_MIN          => 1,
+				IntegerDef::PARAM_MAX          => 2,
 			],
 		];
 	}
