@@ -91,28 +91,21 @@ function post_to_target($params, $user_name)
 
 	$usr_agent = "WikiProjectMed Translation Dashboard/1.0 (https://mdwiki.toolforge.org/; tools.mdwiki@toolforge.org)";
 
-
-
-	if ($user_name === "Mr. Ibrahem") {
-		$url_before = $url;
-		$url = getenv("PUBLISH_URL_NEW") ?: ($_ENV['PUBLISH_URL_NEW'] ?? $url);
-		if ($url !== $url_before) {
-			$payload = json_encode($params);
-			$headers = [
-		        'User-Agent: ' . $usr_agent,
-		        'X-Secret-Key: ' . $publish_secret_code,
-		        'Content-Type: application/json',
-				'Content-Length: ' . strlen($payload),
-	        ];
-			
-			return sendPostRequest($payload, $url, $headers);
-		}
-	}
 	$headers = [
 		'User-Agent: ' . $usr_agent,
 		'X-Secret-Key: ' . $publish_secret_code,
-		'Content-Type: application/x-www-form-urlencoded',
 	];
+
+	if ($user_name === "Mr. Ibrahem") {
+		$newUrl = getenv("PUBLISH_URL_NEW") ?: ($_ENV['PUBLISH_URL_NEW'] ?? $url);
+		if ($newUrl !== $url) {
+			$payload = json_encode($params);
+			$headers[] = 'Content-Type: application/json';
+			$headers[] = 'Content-Length: ' . strlen($payload);
+			return sendPostRequest($payload, $newUrl, $headers);
+		}
+	}
+	$headers[] = 'Content-Type: application/x-www-form-urlencoded';
 	$payload = http_build_query($params);
 	return sendPostRequest($payload, $url, $headers);
 }
