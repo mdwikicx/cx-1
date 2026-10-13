@@ -25,7 +25,14 @@
 
 		return mtService.getSuggestedTitle( sourceTitle ).then(
 			function ( suggestedTitle ) {
-				return mw.cx.getTitleForNamespace( suggestedTitle, mw.cx.getDefaultTargetNamespace() );
+				if ( !suggestedTitle || typeof suggestedTitle !== 'string' ) {
+					return sourceTitle;
+				}
+				try {
+					return mw.cx.getTitleForNamespace( suggestedTitle, mw.cx.getDefaultTargetNamespace() );
+				} catch ( e ) {
+					return sourceTitle;
+				}
 			},
 			function () {
 				return sourceTitle;
