@@ -67,9 +67,7 @@ function sendPostRequest($payload, $url, $headers)
 		return ['error' => $curlErr ?: 'Unknown cURL error', 'response' => $response, 'url' => $url];
 	}
 
-	if ($status !== 200) {
-		return ['error' => "Unexpected HTTP status $status", 'response' => $response, 'url' => $url];
-	}
+	// if ($status !== 200) { return ['error' => "Unexpected HTTP status $status", 'response' => $response, 'url' => $url]; }
 
 	$json = json_decode($response, true);
 
