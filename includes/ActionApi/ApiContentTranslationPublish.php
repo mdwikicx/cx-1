@@ -52,8 +52,6 @@ function sendPostRequest($payload, $url, $headers)
 
 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
-	// wikipedia_result: {"response":"Requests must have a user agent"}
-	// curl_setopt($ch, CURLOPT_USERAGENT, $usr_agent);
 	curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 15);
 	curl_setopt($ch, CURLOPT_TIMEOUT, 15);
 
@@ -73,39 +71,31 @@ function sendPostRequest($payload, $url, $headers)
 		return ['error' => "Unexpected HTTP status $status", 'response' => $response, 'url' => $url];
 	}
 
-	$js = json_decode($response, true);
+	$json = json_decode($response, true);
 
-	if ($js === null) {
+	if ($json === null) {
 		return ['error' => 'Invalid JSON', 'response' => $response, 'url' => $url];
 	}
 
-	return $js ?? ['response' => $response];
+	return $json ?? ['response' => $response];
 }
 
-function post_to_target($params, $user_name)
+function post_to_target($params)
 {
-	// $url = 'https://mdwiki.toolforge.org/publish/index.php';
-	$url = getenv("PUBLISH_URL") ?: ($_ENV['PUBLISH_URL'] ?? 'https://mdwiki.toolforge.org/publish/index.php');
+	$url = getenv("PUBLISH_URL") ?: ($_ENV['PUBLISH_URL'] ?? 'https://mdwiki.toolforge.org/publish');
 
 	$publish_secret_code = getenv("PUBLISH_SECRET_CODE") ?: ($_ENV['PUBLISH_SECRET_CODE'] ?? '');
 
 	$usr_agent = "WikiProjectMed Translation Dashboard/1.0 (https://mdwiki.toolforge.org/; tools.mdwiki@toolforge.org)";
 
+	$payload = json_encode($params);
 	$headers = [
 		'User-Agent: ' . $usr_agent,
 		'X-Secret-Key: ' . $publish_secret_code,
+		'Content-Type: application/json',
+		'Content-Length: ' . strlen($payload),
 	];
 
-	if ($user_name === "Mr. Ibrahem") {
-		$newUrl = getenv("PUBLISH_URL_NEW") ?: ($_ENV['PUBLISH_URL_NEW'] ?? $url);
-		if ($newUrl !== $url) {
-			$payload = json_encode($params);
-			$headers[] = 'Content-Type: application/json';
-			$headers[] = 'Content-Length: ' . strlen($payload);
-			return sendPostRequest($payload, $newUrl, $headers);
-		}
-	}
-	$headers[] = 'Content-Type: application/x-www-form-urlencoded';
 	$payload = http_build_query($params);
 	return sendPostRequest($payload, $url, $headers);
 }
@@ -164,7 +154,7 @@ class ApiContentTranslationPublish extends ApiBase
 			$t_Params['wpCaptchaWord'] = $params['wpCaptchaWord'];
 		}
 
-		$wikipedia_result = post_to_target($t_Params, $user_name);
+		$wikipedia_result = post_to_target($t_Params);
 		return $wikipedia_result;
 	}
 	protected function saveWikitext($title, $wikitext, $params)
@@ -195,10 +185,6 @@ class ApiContentTranslationPublish extends ApiBase
 		)->inContentLanguage()->text();
 
 		$user_name = $this->getUser()->getName();
-
-		if (isset($params['user']) && $params['user'] != '') {
-			$user_name = $params['user'];
-		}
 
 		$wikipedia_result = [];
 
