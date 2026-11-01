@@ -96,7 +96,6 @@ function post_to_target($params)
 		'Content-Length: ' . strlen($payload),
 	];
 
-	$payload = http_build_query($params);
 	return sendPostRequest($payload, $url, $headers);
 }
 
