@@ -347,15 +347,14 @@ mw.cx.TargetArticle.prototype.publishFail = function (errorCode, messageOrFailOb
 
 		// mdwiki errors
 		if (editError.code === 'validation_error') {
-			// "info": { "user": [ "Missing data for required field.", ], "wiki": [ "Missing data for required field.", ], },
-			// show info errors in lines like: (user: Missing data for required field.<br> wiki: Missing data for required field.)
-			let errorinfo = "";
-			for (let key in editError.info) {
-				if (editError.info.hasOwnProperty(key)) {
-					errorinfo += key + ': ' + editError.info[key].join('<br>');
-				}
-			}
-			this.showPublishError("validation_error", errorinfo);
+			this.showPublishError("validation_error", editError.info);
+			$('.cx-message-widget-message')
+				.empty()
+				.append(
+					$('<span>').text('Validation error: '),
+					$('<span>').html(editError.info)
+				);
+			return;
 		}
 		// Handle spam blacklist error (either from core or from Extension:SpamBlacklist)
 		// Example of API result - https://phabricator.wikimedia.org/P8991
