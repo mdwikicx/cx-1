@@ -319,6 +319,9 @@ mw.cx.TargetArticle.prototype.publishFail = function (errorCode, messageOrFailOb
 	const editError = data.error ? data.error : data.edit?.error;
 
 	if (editError) {
+		console.log("editError: " + JSON.stringify(editError, null, 1));
+	}
+	if (editError && editError.code) {
 		// {"result":"error","edit":{"error":"noaccess","username":"Mr. Ibrahem"}}
 		let noaccess_errors = [
 			"mwoauth-invalid-authorization",
@@ -511,6 +514,10 @@ mw.cx.TargetArticle.prototype.showErrorUnknown = function (editResult, data, jqX
 	const errorMsg = editResult?.info ?? data?.error?.info;
 	const errorCode = editResult?.code ?? data?.error?.code;
 
+	// if errorMsg is object then convert it to string
+	if (typeof errorMsg === 'object') {
+		errorMsg = JSON.stringify(errorMsg);
+	}
 	let unknown = 'Unknown error';
 
 	if (jqXHR && jqXHR.status !== 200) {
