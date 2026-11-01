@@ -328,6 +328,7 @@ mw.cx.TargetArticle.prototype.publishFail = function (errorCode, messageOrFailOb
 			"noaccess",
 			"no access",
 		];
+		// mdwiki errors
 		if (noaccess_errors.includes(editError.code)) {
 			this.showPublishError(mddx, "no access_keys in Translation_Dashboard");
 			// $('.cx-message-widget-message').html(mddxlink)
@@ -341,10 +342,21 @@ mw.cx.TargetArticle.prototype.publishFail = function (errorCode, messageOrFailOb
 						.text('Translation Dashboard')
 				);
 			$('.cx-message-widget-details').html(" Then refresh the page");
-			// $('.cx-message-widget-details').html("<a href='https://mdwiki.toolforge.org/Translation_Dashboard/auth.php?a=login' target='_blank'>Translation Dashboard</a>")
 			return;
 		}
 
+		// mdwiki errors
+		if (editError.code === 'validation_error') {
+			// "info": { "user": [ "Missing data for required field.", ], "wiki": [ "Missing data for required field.", ], },
+			// show info errors in lines like: (user: Missing data for required field.<br> wiki: Missing data for required field.)
+			let errorinfo = "";
+			for (let key in editError.info) {
+				if (editError.info.hasOwnProperty(key)) {
+					errorinfo += key + ': ' + editError.info[key].join('<br>');
+				}
+			}
+			this.showPublishError("validation_error", errorinfo);
+		}
 		// Handle spam blacklist error (either from core or from Extension:SpamBlacklist)
 		// Example of API result - https://phabricator.wikimedia.org/P8991
 		if (editError.code === 'spamblacklist') {
@@ -511,7 +523,7 @@ mw.cx.TargetArticle.prototype.showErrorException = function (failObj) {
  * @param {Object} jqXHR
  */
 mw.cx.TargetArticle.prototype.showErrorUnknown = function (editResult, data, jqXHR) {
-	const errorMsg = editResult?.info ?? data?.error?.info;
+	let errorMsg = editResult?.info ?? data?.error?.info;
 	const errorCode = editResult?.code ?? data?.error?.code;
 
 	// if errorMsg is object then convert it to string
