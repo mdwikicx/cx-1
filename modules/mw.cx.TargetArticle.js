@@ -218,6 +218,7 @@ mw.cx.TargetArticle.prototype.publishSuccess = function (response, jqXHR) {
 
 	// const mdwiki_result = publishResult?.mdwiki_result;
 	const wikipedia_result = publishResult?.wikipedia_result;
+	const sourceRevisionId = publishResult?.sourceRevisionId;
 
 	const wd_data = wikipedia_result.LinkToWikidata || publishResult.LinkToWikidata || [];
 
@@ -254,7 +255,7 @@ mw.cx.TargetArticle.prototype.publishSuccess = function (response, jqXHR) {
 
 		if (this.sourceLanguage === "mdwiki") {
 			var title2 = new_title || this.getTargetTitle();
-			this.addMdwikiLinks(this.targetLanguage, title2, wd_data);
+			this.addMdwikiLinks(this.targetLanguage, title2, wd_data, sourceRevisionId);
 		}
 
 		return done;
@@ -351,7 +352,8 @@ mw.cx.TargetArticle.prototype.publishFail = function (errorCode, messageOrFailOb
 			$('.cx-message-widget-message')
 				.empty()
 				.append(
-					$('<span>').text('Validation error: '),
+					$('<span>').text('Validation error:'),
+					$('<br>'),
 					$('<span>').html(editError.info)
 				);
 			return;
@@ -721,10 +723,11 @@ mw.cx.TargetArticle.prototype.getTags = function (hasTooMuchUnmodifiedText) {
 	return tagString;
 };
 
-mw.cx.TargetArticle.prototype.addMdwikiLinks = function (targetLanguage, targetTitle, wd_data) {
+mw.cx.TargetArticle.prototype.addMdwikiLinks = function (targetLanguage, targetTitle, wd_data, sourceRevisionId) {
 	const pp = {
 		lang: targetLanguage,
 		title: targetTitle,
+		mdwiki_revid: sourceRevisionId,
 		save: 1
 	};
 	var url = "https://mdwiki.toolforge.org/fixwikirefs.php?" + $.param(pp);

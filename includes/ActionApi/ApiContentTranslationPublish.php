@@ -414,9 +414,11 @@ class ApiContentTranslationPublish extends ApiBase
 			];
 		}
 
+		$sourceRevisionId = $this->translation->translation['sourceRevisionId'];
 		// $result['save_result_all'] = $saveresult_all;
 		$result['wikipedia_result'] = $saveresult_all['wikipedia_result'] ?? [];
 		$result['local_result'] = $saveresult_all['local_result'] ?? [];
+		$result['sourceRevisionId'] = $sourceRevisionId;
 
 		// if warnings in $result['local_result'] del it
 		// unset($result['wikipedia_result']['warnings']);
