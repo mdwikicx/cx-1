@@ -744,7 +744,9 @@ mw.cx.TargetArticle.prototype.addMdwikiLinks = function (targetLanguage, targetT
 		var wdurl = `https://www.wikidata.org/wiki/Special:SetSiteLink/${qid}/${target_wiki}?` + $.param({ page: targetTitle });
 		wdlink = ` - <a href='${wdurl}' target='_blank'>Link to Wikidata</a>`
 	}
-	var html = `<div style="float:left;">${link}${wdlink}</div>`;
+	// var html = `<div style="float:left;">${link}${wdlink}</div>`;
+	var html = `<br>x${link}${wdlink}`;
 
-	$('.cx-message-widget-details').append(html);
+	// $('.cx-message-widget-details').append(html);
+	$('.cx-message-widget-message').append(html);
 }
