@@ -159,7 +159,14 @@ mw.cx.MachineTranslationService.prototype.fetchProviders = function () {
 	}
 
 	return $.get(fetchProvidersUrl).then(function (response) {
-		return response.mt || [];
+		let providers = response.mt || [];
+
+		if (providers.includes('Google')) {
+			// Filter and prepend 'Google' in a cleaner way
+			providers = ['Google', ...providers.filter(item => item !== 'Google')];
+		}
+
+		return providers;
 	});
 };
 
