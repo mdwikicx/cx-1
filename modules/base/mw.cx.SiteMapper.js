@@ -22,6 +22,7 @@ mw.cx.SiteMapper = function (overrides) {
 
 	const siteMapperConfig = Object.assign({}, config, overrides);
 	this.siteTemplates = siteMapperConfig.SiteTemplates;
+	// By: Ibrahem Qasim
 	this.SiteTemplates_mdwiki = siteMapperConfig.SiteTemplates_mdwiki;
 	this.codeMap = siteMapperConfig.DomainCodeMapping;
 	this.translateInTarget = siteMapperConfig.TranslateInTarget;

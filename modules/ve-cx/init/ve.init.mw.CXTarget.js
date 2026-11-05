@@ -533,6 +533,8 @@ ve.init.mw.CXTarget.prototype.onSurfaceReady = function () {
 	if ( this.translation.hasTranslatedSections() ) {
 		mw.log.warn( '[TD] Translation has Translated Sections, skipping auto translations.' );
 		this.targetSurface.$element.addClass( 've-ui-cxTargetSurface--non-empty' );
+	};
+	/*
 	} else {
 		const sections = $('.cx-column--translation article').find('section');
 		if ( sections && sections.length > 0 ) {
@@ -545,7 +547,7 @@ ve.init.mw.CXTarget.prototype.onSurfaceReady = function () {
 		} else {
 			mw.log.warn( '[TD] No sections to start auto translations.' );
 		}
-	}
+	}*/
 };
 
 /**
