@@ -15,8 +15,7 @@ mw.cx.TargetArticle = function MWCXTargetArticle(translation, veTarget, config) 
 	this.veTarget = veTarget;
 	this.config = config;
 	this.siteMapper = config.siteMapper;
-	this.campaign = config.campaign || '';
-
+	this.campaign = config.campaign || ''; // By: Ibrahem Qasim
 	console.log('MWCXTargetArticle: campaign: ' + this.campaign);
 	this.sourceTitle = translation.getSourceTitle();
 	this.sourceLanguage = translation.getSourceLanguage();
@@ -148,9 +147,9 @@ mw.cx.TargetArticle.prototype.publish = function (hasIssues, hasTooMuchUnmodifie
 			to: this.targetLanguage,
 			sourcetitle: this.sourceTitle,
 			title: this.getTargetTitle(),
-			// user: mw.user.getName(),
+			// user: mw.user.getName(), // By: Ibrahem Qasim
 			html,
-			campaign: this.campaign,
+			campaign: this.campaign, // By: Ibrahem Qasim
 			categories: this.getTargetCategories(hasTooMuchUnmodifiedText),
 			publishtags: this.getTags(hasTooMuchUnmodifiedText),
 			wpCaptchaId: this.captcha && this.captcha.id,
@@ -214,6 +213,7 @@ mw.cx.TargetArticle.prototype.publishSection = function () {
 mw.cx.TargetArticle.prototype.publishSuccess = function (response, jqXHR) {
 	const publishAction = this.translation.isSectionTranslation() ? 'cxpublishsection' : 'cxpublish';
 	const publishResult = response[publishAction];
+	// By: Ibrahem Qasim
 	console.log("publishSuccess:");
 
 	// const mdwiki_result = publishResult?.mdwiki_result;
@@ -295,6 +295,7 @@ mw.cx.TargetArticle.prototype.publishComplete = function (apiTargetTitle) {
  */
 mw.cx.TargetArticle.prototype.publishFail = function (errorCode, messageOrFailObjOrData, data, jqXHR) {
 	if (!data) {
+		// By: Ibrahem Qasim
 		mw.log.warn('[TD] publishFail no data');
 		if (errorCode === 'ok-but-empty') {
 			this.showPublishError(mw.msg('cx-publish-error-empty'));
@@ -313,6 +314,7 @@ mw.cx.TargetArticle.prototype.publishFail = function (errorCode, messageOrFailOb
 		this.getTargetTitle(),
 		data
 	);
+	// By: Ibrahem Qasim
 	let mddx = "[TD] OAuth session expired, Please Log again to Translation Dashboard";
 	// cx-message-widget-message
 	let mddxlink = "OAuth session expired, Please Log again to <a href='https://mdwiki.toolforge.org/Translation_Dashboard/auth.php?a=login' target='_blank'>Translation Dashboard</a>";
@@ -391,6 +393,7 @@ mw.cx.TargetArticle.prototype.publishFail = function (errorCode, messageOrFailOb
 		} else if (editError.code === 'readonly') {
 			this.showUnrecoverablePublishError(mw.msg('cx-publish-error-readonly'), editError.readonlyreason);
 			return;
+			// By: Ibrahem Qasim
 		} else if (editError.code === 'protectedpage') {
 			this.showPublishError(
 				"The page: (" + this.getTargetTitle() + ") has been protected to prevent editing or other actions.",
@@ -465,10 +468,9 @@ mw.cx.TargetArticle.prototype.showErrorCaptcha = function (apiResult) {
 		// Based on FancyCaptcha::getFormInformation() (https://git.io/v6mml) and
 		// ext.confirmEdit.fancyCaptcha.js in the ConfirmEdit extension.
 		mw.loader.load('ext.confirmEdit.fancyCaptcha');
-
+		// By: Ibrahem Qasim
 		let wikiurl = "https://" + this.targetLanguage + ".wikipedia.org";
 		this.captchaDialog.setFancyCaptcha(wikiurl + apiResult.url);
-
 	} else if (apiResult.type === 'simple' || apiResult.type === 'math') {
 		// SimpleCaptcha and MathCaptcha
 		this.captchaDialog.setCaptcha('captcha-create', apiResult.question, apiResult.mime);
@@ -524,9 +526,11 @@ mw.cx.TargetArticle.prototype.showErrorException = function (failObj) {
  * @param {Object} jqXHR
  */
 mw.cx.TargetArticle.prototype.showErrorUnknown = function (editResult, data, jqXHR) {
+	// By: Ibrahem Qasim
 	let errorMsg = editResult?.info ?? data?.error?.info;
 	const errorCode = editResult?.code ?? data?.error?.code;
 
+	// By: Ibrahem Qasim
 	// if errorMsg is object then convert it to string
 	if (typeof errorMsg === 'object') {
 		errorMsg = JSON.stringify(errorMsg);
@@ -722,6 +726,7 @@ mw.cx.TargetArticle.prototype.getTags = function (hasTooMuchUnmodifiedText) {
 
 	return tagString;
 };
+// By: Ibrahem Qasim
 
 mw.cx.TargetArticle.prototype.addMdwikiLinks = function (targetLanguage, targetTitle, wd_data, sourceRevisionId) {
 	const pp = {
