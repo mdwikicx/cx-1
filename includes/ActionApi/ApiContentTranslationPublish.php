@@ -183,6 +183,10 @@ class ApiContentTranslationPublish extends ApiBase
 
 		$user_name = $this->getUser()->getName();
 
+		// if (isset($params['user']) && $params['user'] != '') {
+		// 	$user_name = $params['user'];
+		// }
+
 		$wikipedia_result = [];
 
 		if ($params['from'] === "mdwiki") { #$wikipedia_result
