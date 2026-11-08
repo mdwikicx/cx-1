@@ -51,7 +51,7 @@ ve.dm.CXReferenceNode.static.toDataElement = function (domElements) {
 	// When reference adaptation is missing/failed, copy the source reference as is
 	// and mark it as adapted so it is not dropped or reported as missing.
 	cxData.adapted = true;
-	cxData.partial = true;
+	cxData.partial = false;
 
 	dataElement.attributes.cx = cxData;
 
