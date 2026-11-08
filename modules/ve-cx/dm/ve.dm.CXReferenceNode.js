@@ -13,47 +13,45 @@
  */
 ve.dm.CXReferenceNode = function VeDmCXReferenceNode() {
 	// Parent constructor
-	ve.dm.CXReferenceNode.super.apply( this, arguments );
+	ve.dm.CXReferenceNode.super.apply(this, arguments);
 
 	// Mixin constructor
-	ve.dm.CXLintableNode.call( this );
+	ve.dm.CXLintableNode.call(this);
 
 	// attach is fired when section is filled with MT, but not on restoring.
-	this.connect( this, {
+	this.connect(this, {
 		attach: 'onAttach',
 		detach: 'onDetach'
-	} );
+	});
 };
 
 /* Inheritance */
 
-OO.inheritClass( ve.dm.CXReferenceNode, ve.dm.MWReferenceNode );
-OO.mixinClass( ve.dm.CXReferenceNode, ve.dm.CXLintableNode );
+OO.inheritClass(ve.dm.CXReferenceNode, ve.dm.MWReferenceNode);
+OO.mixinClass(ve.dm.CXReferenceNode, ve.dm.CXLintableNode);
 
 /* Static Methods */
 
 /**
  * @inheritdoc
  */
-ve.dm.CXReferenceNode.static.toDataElement = function ( domElements ) {
-	const cxDataJSON = domElements[ 0 ].getAttribute( 'data-cx' );
+ve.dm.CXReferenceNode.static.toDataElement = function (domElements) {
+	const cxDataJSON = domElements[0].getAttribute('data-cx');
 
 	// Parent method
-	const dataElement = ve.dm.CXReferenceNode.super.static.toDataElement.apply( this, arguments );
+	const dataElement = ve.dm.CXReferenceNode.super.static.toDataElement.apply(this, arguments);
 
 	let cxData;
 	try {
-		cxData = cxDataJSON ? JSON.parse( cxDataJSON ) : {};
-	} catch ( e ) {
+		cxData = cxDataJSON ? JSON.parse(cxDataJSON) : {};
+	} catch (e) {
 		cxData = {};
 	}
 	// New By: Ibrahem Qasim
 	// When reference adaptation is missing/failed, copy the source reference as is
 	// and mark it as adapted so it is not dropped or reported as missing.
-	if (cxData) {
-		cxData.adapted = true;
-		cxData.partial = true;
-	}
+	cxData.adapted = true;
+	cxData.partial = true;
 
 	dataElement.attributes.cx = cxData;
 
@@ -63,18 +61,18 @@ ve.dm.CXReferenceNode.static.toDataElement = function ( domElements ) {
 /**
  * @inheritdoc
  */
-ve.dm.CXReferenceNode.static.toDomElements = function ( dataElement ) {
+ve.dm.CXReferenceNode.static.toDomElements = function (dataElement) {
 	try {
-		const elements = ve.dm.CXReferenceNode.super.static.toDomElements.apply( this, arguments );
-		const cxData = OO.getProp( dataElement, 'attributes', 'cx' );
+		const elements = ve.dm.CXReferenceNode.super.static.toDomElements.apply(this, arguments);
+		const cxData = OO.getProp(dataElement, 'attributes', 'cx');
 
-		if ( cxData ) {
-			elements[ 0 ].setAttribute( 'data-cx', JSON.stringify( cxData ) );
+		if (cxData) {
+			elements[0].setAttribute('data-cx', JSON.stringify(cxData));
 		}
 
 		return elements;
-	} catch ( error ) {
-		mw.errorLogger.logError( error, 'error.contenttranslation' );
+	} catch (error) {
+		mw.errorLogger.logError(error, 'error.contenttranslation');
 
 		return [];
 	}
@@ -83,29 +81,29 @@ ve.dm.CXReferenceNode.static.toDomElements = function ( dataElement ) {
 /* Methods */
 
 ve.dm.CXReferenceNode.prototype.onAttach = function () {
-	const sectionNode = this.findParent( ve.dm.CXSectionNode );
+	const sectionNode = this.findParent(ve.dm.CXSectionNode);
 	// When section content is replaced, this happens:
 	// 1) attach is called with VeDmSectionNode and we cannot access VeDmCXSectionNode
 	// 2) detach is called with VeDmCXSectionNode and we unregister our warning
-	if ( !sectionNode ) {
+	if (!sectionNode) {
 		return;
 	}
 
 	// This is just a sanity check, since source column does not have data-cx
-	if ( !sectionNode.isTargetSection() ) {
+	if (!sectionNode.isTargetSection()) {
 		return;
 	}
 
 	const cxData = this.getAdaptationInfo();
 	let title, message;
-	if ( cxData.partial === true ) {
-		title = mw.msg( 'cx-tools-linter-incomplete-reference' );
-		message = mw.message( 'cx-tools-linter-incomplete-reference-message' );
-	} else if ( cxData.adapted === false ) {
-		title = mw.msg( 'cx-tools-linter-reference' );
-		message = mw.message( 'cx-tools-linter-reference-message' );
+	if (cxData.partial === true) {
+		title = mw.msg('cx-tools-linter-incomplete-reference');
+		message = mw.message('cx-tools-linter-incomplete-reference-message');
+	} else if (cxData.adapted === false) {
+		title = mw.msg('cx-tools-linter-reference');
+		message = mw.message('cx-tools-linter-reference-message');
 	} else {
-		if ( cxData.adapted !== true ) {
+		if (cxData.adapted !== true) {
 			mw.log.warn(
 				'[CX] Reference adaptation status is missing for the reference in section ' +
 				sectionNode.getId()
@@ -115,7 +113,7 @@ ve.dm.CXReferenceNode.prototype.onAttach = function () {
 		return;
 	}
 
-	sectionNode.addTranslationIssues( [ {
+	sectionNode.addTranslationIssues([{
 		name: 'reference',
 		message: message,
 		messageInfo: {
@@ -123,12 +121,12 @@ ve.dm.CXReferenceNode.prototype.onAttach = function () {
 			resolvable: true,
 			help: 'https://www.mediawiki.org/wiki/Special:MyLanguage/Content_translation/Templates'
 		}
-	} ] );
+	}]);
 };
 
-ve.dm.CXReferenceNode.prototype.onDetach = function ( parent ) {
-	if ( parent instanceof ve.dm.CXSectionNode && parent.isTargetSection() ) {
-		parent.resolveTranslationIssues( [ 'reference' ] );
+ve.dm.CXReferenceNode.prototype.onDetach = function (parent) {
+	if (parent instanceof ve.dm.CXSectionNode && parent.isTargetSection()) {
+		parent.resolveTranslationIssues(['reference']);
 	}
 };
 
@@ -140,19 +138,19 @@ ve.dm.CXReferenceNode.prototype.onDetach = function ( parent ) {
 ve.dm.CXReferenceNode.prototype.getAdaptationInfo = function () {
 	let cxData = {};
 
-	const contentsUsed = this.getAttribute( 'contentsUsed' );
+	const contentsUsed = this.getAttribute('contentsUsed');
 	// If contentsUsed is false, then this reference is a reused reference.
 	// The adaptation status needs to be extracted from original reference.
-	if ( contentsUsed ) {
-		cxData = this.getAttribute( 'cx' ) || {};
+	if (contentsUsed) {
+		cxData = this.getAttribute('cx') || {};
 	} else {
 		const nodeGroup = this.doc.getInternalList().getNodeGroup(
-			this.getAttribute( 'listGroup' )
+			this.getAttribute('listGroup')
 		);
-		const kinNodes = nodeGroup && nodeGroup.keyedNodes[ this.getAttribute( 'listKey' ) ];
+		const kinNodes = nodeGroup && nodeGroup.keyedNodes[this.getAttribute('listKey')];
 		// See if there is any kin nodes and if so, use the first one.
-		if ( kinNodes && kinNodes.length > 0 ) {
-			cxData = kinNodes[ 0 ].getAttribute( 'cx' ) || {};
+		if (kinNodes && kinNodes.length > 0) {
+			cxData = kinNodes[0].getAttribute('cx') || {};
 		}
 	}
 	return cxData;
@@ -160,4 +158,4 @@ ve.dm.CXReferenceNode.prototype.getAdaptationInfo = function () {
 
 /* Registration */
 
-ve.dm.modelRegistry.register( ve.dm.CXReferenceNode );
+ve.dm.modelRegistry.register(ve.dm.CXReferenceNode);

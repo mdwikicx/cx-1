@@ -2,7 +2,7 @@
  * ContentTranslation initialization module.
  */
 
-( function () {
+(function () {
 	'use strict';
 
 	/**
@@ -18,19 +18,19 @@
 	 * @param {mw.cx.MachineTranslationService} mtService
 	 * @return {jQuery.Promise}
 	 */
-	function getTargetTitle( targetTitleUrlParam, sourceTitle, mtService ) {
-		if ( targetTitleUrlParam ) {
-			return $.Deferred().resolve( targetTitleUrlParam );
+	function getTargetTitle(targetTitleUrlParam, sourceTitle, mtService) {
+		if (targetTitleUrlParam) {
+			return $.Deferred().resolve(targetTitleUrlParam);
 		}
 
-		return mtService.getSuggestedTitle( sourceTitle ).then(
-			function ( suggestedTitle ) {
-				if ( !suggestedTitle || typeof suggestedTitle !== 'string' ) {
+		return mtService.getSuggestedTitle(sourceTitle).then(
+			function (suggestedTitle) {
+				if (!suggestedTitle || typeof suggestedTitle !== 'string') {
 					return sourceTitle;
 				}
 				try {
-					return mw.cx.getTitleForNamespace( suggestedTitle, mw.cx.getDefaultTargetNamespace() );
-				} catch ( e ) {
+					return mw.cx.getTitleForNamespace(suggestedTitle, mw.cx.getDefaultTargetNamespace());
+				} catch (e) {
 					return sourceTitle;
 				}
 			},
@@ -46,9 +46,9 @@
 		const query = new mw.Uri().query;
 		if (
 			!query.page || !query.from || !query.to ||
-			( mw.Title.newFromText( query.page ) === null )
+			(mw.Title.newFromText(query.page) === null)
 		) {
-			location.href = mw.util.getUrl( 'Special:ContentTranslation' );
+			location.href = mw.util.getUrl('Special:ContentTranslation');
 			return;
 		}
 
@@ -66,40 +66,41 @@
 		services = {
 			siteMapper: mw.cx.siteMapper
 		};
-		services.requestManager = new mw.cx.MwApiRequestManager( mw.cx.sourceLanguage, mw.cx.targetLanguage, services.siteMapper );
-		services.MTService = new mw.cx.MachineTranslationService( mw.cx.sourceLanguage, mw.cx.targetLanguage, services.siteMapper );
-		services.MTManager = new mw.cx.MachineTranslationManager( mw.cx.sourceLanguage, mw.cx.targetLanguage, services.MTService );
+		services.requestManager = new mw.cx.MwApiRequestManager(mw.cx.sourceLanguage, mw.cx.targetLanguage, services.siteMapper);
+		services.MTService = new mw.cx.MachineTranslationService(mw.cx.sourceLanguage, mw.cx.targetLanguage, services.siteMapper);
+		services.MTManager = new mw.cx.MachineTranslationManager(mw.cx.sourceLanguage, mw.cx.targetLanguage, services.MTService);
+		// By: Ibrahem Qasim
 		services.campaign = query.campaign;
 		services.tr_type = query.tr_type;
 
-		getTargetTitle( query.targettitle, sourceTitle, services.MTService ).then( function ( targetTitle ) {
-			const sourceWikiPage = new mw.cx.dm.WikiPage( sourceTitle, mw.cx.sourceLanguage, sourceRevision, sourceSectionTitle );
-			const targetWikiPage = new mw.cx.dm.WikiPage( targetTitle, mw.cx.targetLanguage, null, targetSectionTitle );
-			const translation = new mw.cx.init.Translation( sourceWikiPage, targetWikiPage, services );
+		getTargetTitle(query.targettitle, sourceTitle, services.MTService).then(function (targetTitle) {
+			const sourceWikiPage = new mw.cx.dm.WikiPage(sourceTitle, mw.cx.sourceLanguage, sourceRevision, sourceSectionTitle);
+			const targetWikiPage = new mw.cx.dm.WikiPage(targetTitle, mw.cx.targetLanguage, null, targetSectionTitle);
+			const translation = new mw.cx.init.Translation(sourceWikiPage, targetWikiPage, services);
 			translation.init();
 
-			if ( query.campaign ) {
-				mw.hook( 'mw.cx.cta.accept' ).fire( query.campaign, mw.cx.sourceLanguage, sourceTitle, mw.cx.targetLanguage );
+			if (query.campaign) {
+				mw.hook('mw.cx.cta.accept').fire(query.campaign, mw.cx.sourceLanguage, sourceTitle, mw.cx.targetLanguage);
 			}
 
-			if ( mw.config.get( 'wgContentTranslationBetaFeatureEnabled' ) ) {
-				mw.notify( mw.msg( 'cx-beta-feature-enabled-notification' ) );
+			if (mw.config.get('wgContentTranslationBetaFeatureEnabled')) {
+				mw.notify(mw.msg('cx-beta-feature-enabled-notification'));
 			}
 
 			// The default values for these options depend on PageImages and Wikibase Client
 			// being installed on this wiki. Because we are querying remote wikis, this makes
 			// no sense, and hence overwrite the values.
-			const VEConfig = mw.config.get( 'wgVisualEditorConfig' );
+			const VEConfig = mw.config.get('wgVisualEditorConfig');
 			VEConfig.usePageImages = true;
 			VEConfig.usePageDescriptions = true;
-			mw.config.set( 'wgVisualEditorConfig', VEConfig );
-		} );
+			mw.config.set('wgVisualEditorConfig', VEConfig);
+		});
 
 	}
 
 	// On document ready, initialize, but not during QUnit tests, when this code is loaded
 	// only because another file in this module has tests
-	if ( !window.QUnit ) {
-		$( initCX );
+	if (!window.QUnit) {
+		$(initCX);
 	}
-}() );
+}());

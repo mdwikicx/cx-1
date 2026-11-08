@@ -83,7 +83,8 @@ mw.cx.SiteMapper.prototype.getLanguageCodeForWikiDomain = function (domain, fall
  */
 mw.cx.SiteMapper.prototype.getApi = function (language, options) {
 	const domain = this.getWikiDomainCode(language);
-
+	// const url = this.siteTemplates.api.replace('$1', domain);
+	// By: Ibrahem Qasim
 	const url = language === 'mdwiki'
 		? this.SiteTemplates_mdwiki.api
 		: this.siteTemplates.api.replace('$1', domain);
@@ -128,6 +129,7 @@ mw.cx.SiteMapper.prototype.getPageUrl = function (language, title, params, hash)
 	if (this.isMobileDomain()) {
 		prefix += '.m';
 	}
+	// By: Ibrahem Qasim
 	const templates = language === 'mdwiki'
 		? this.SiteTemplates_mdwiki
 		: this.siteTemplates;
@@ -136,7 +138,8 @@ mw.cx.SiteMapper.prototype.getPageUrl = function (language, title, params, hash)
 	if (params && Object.keys(params).length > 0) {
 		base = templates.action || templates.view;
 	}
-
+	// base = base.replace('$1', prefix).replace('$2', mw.util.wikiUrlencode(title).replace(/\$/g, '$$$$'));
+	// By: Ibrahem Qasim
 	if (domain !== 'mdwiki') {
 		base = base.replace('$1', prefix);
 	}
@@ -174,6 +177,7 @@ mw.cx.SiteMapper.prototype.getCXServerUrl = function (module, params) {
 	if (mw.cx.getCXVersion() === 2) {
 		cxserverURL = cxserverURL.replace('v1', 'v2');
 	}
+	// By: Ibrahem Qasim
 	// if module has /mdwiki then replace it with /en
 	if (module.indexOf('/mdwiki/') > -1) {
 		module = module.replace('/mdwiki/', '/en/');

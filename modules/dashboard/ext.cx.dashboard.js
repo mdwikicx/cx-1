@@ -75,6 +75,8 @@
 		this.siteMapper.getLanguagePairs().then(
 			( data ) => {
 				// We store valid source and target languages as "static" variables of LanguageFilter
+				// ----
+				// By: Ibrahem Qasim
 
 				// data.sourceLanguages.push( 'mdwiki' );
 				data.sourceLanguages = [ 'mdwiki' ];
@@ -83,7 +85,7 @@
 				data.targetLanguages = data.targetLanguages.filter( ( language ) => {
 					return ( language !== 'en' && language !== 'simple' );
 				} );
-
+				// ----
 				mw.cx.ui.LanguageFilter.static.sourceLanguages = data.sourceLanguages;
 				mw.cx.ui.LanguageFilter.static.targetLanguages = data.targetLanguages;
 

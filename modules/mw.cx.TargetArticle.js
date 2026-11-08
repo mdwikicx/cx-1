@@ -96,7 +96,6 @@ mw.cx.TargetArticle.static.getCleanedupContent = function (doc) {
 	// is reset upon editing, so we check if reference is still marked as unadapted.
 	Array.prototype.forEach.call(doc.querySelectorAll('.mw-ref'), function (element) {
 		const dataCX = JSON.parse(element.getAttribute('data-cx') || '{}');
-
 		if (dataCX.adapted === false) {
 			element.parentNode.removeChild(element);
 		}

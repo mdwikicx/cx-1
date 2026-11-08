@@ -84,7 +84,7 @@ mw.cx.init.Translation.prototype.init = function () {
 			);
 
 			this.sourceWikiPage.setRevision(sourcePageContent.revision);
-
+			// By: Ibrahem Qasim
 			if (this.sourceWikiPage.getLanguage() == "mdwiki") {
 				var segmentedError = sourcePageContent.error;
 				if (segmentedError) {
@@ -270,9 +270,8 @@ mw.cx.init.Translation.prototype.attachToDOM = function (veTarget) {
  * @param {mw.cx.SiteMapper} siteMapper
  * @return {Promise}
  */
-
 mw.cx.init.Translation.prototype.fetchSourcePageContent = function (wikiPage, targetLanguage, siteMapper) {
-
+	// By: Ibrahem Qasim
 	if (wikiPage.getLanguage() === "mdwiki") {
 		const pageTitle = wikiPage.getTitle();
 		const userName = mw.user.getName();
@@ -393,6 +392,7 @@ mw.cx.init.Translation.prototype.fetchDraftTranslation = function (
  * @return {Promise<mw.cx.dm.DraftTranslationDTO|null>} Draft or null.
  */
 mw.cx.init.Translation.prototype.fetchDraftTranslationSuccess = function (draft, conflict) {
+	// By: Ibrahem Qasim
 	const admin_users = ['Doc James', 'Mr. Ibrahem 1'];
 
 	if (admin_users.includes(mw.user.getName()) && conflict) {

@@ -11,75 +11,76 @@
  * @param {string} [config.sourceSectionTitle] The title of the source section
  * @param {string} [config.targetSectionTitle] The title of the target section
  */
-mw.cx.ui.TranslationView = function ( config ) {
-	this.infobar = new mw.cx.ui.Infobar( config );
+mw.cx.ui.TranslationView = function (config) {
+	this.infobar = new mw.cx.ui.Infobar(config);
+	// By: Ibrahem Qasim
 	var sourceLanguage = config.sourceLanguage;
 	// if (sourceLanguage === 'mdwiki') { sourceLanguage = 'en'; }
-	this.sourceColumn = new mw.cx.ui.SourceColumn( {
+	this.sourceColumn = new mw.cx.ui.SourceColumn({
 		siteMapper: config.siteMapper,
 		language: sourceLanguage,
 		title: config.sourceTitle,
 		sectionTitle: config.sourceSectionTitle
-	} );
-	this.targetColumn = new mw.cx.ui.TargetColumn( {
+	});
+	this.targetColumn = new mw.cx.ui.TargetColumn({
 		siteMapper: config.siteMapper,
 		language: config.targetLanguage,
 		title: config.targetTitle,
 		sectionTitle: config.targetSectionTitle || config.sourceSectionTitle
-	} );
-	this.toolsColumn = new mw.cx.ui.ToolsColumn( config );
-	this.translationHeader = new mw.cx.ui.TranslationHeader( config );
+	});
+	this.toolsColumn = new mw.cx.ui.ToolsColumn(config);
+	this.translationHeader = new mw.cx.ui.TranslationHeader(config);
 	this.titleValidationTool = null;
 	// @var {mw.cx.ui.Categories}
 	this.categoryUI = null;
 
 	this.pageName = this.targetColumn.getTitle();
-	this.contentContainer = new OO.ui.HorizontalLayout( $.extend( {}, config, {
+	this.contentContainer = new OO.ui.HorizontalLayout($.extend({}, config, {
 		continuous: true,
 		expanded: true,
-		classes: [ 'cx-content-container' ],
-		items: [ this.sourceColumn, this.targetColumn ]
-	} ) );
+		classes: ['cx-content-container'],
+		items: [this.sourceColumn, this.targetColumn]
+	}));
 
-	this.translationViewContainer = new OO.ui.StackLayout( $.extend( {}, config, {
+	this.translationViewContainer = new OO.ui.StackLayout($.extend({}, config, {
 		continuous: true,
 		expanded: false,
-		classes: [ 'cx-translation-view-container' ],
+		classes: ['cx-translation-view-container'],
 		scrollable: false,
 		padded: false,
-		items: [ this.translationHeader, this.infobar, this.contentContainer ]
-	} ) );
+		items: [this.translationHeader, this.infobar, this.contentContainer]
+	}));
 
-	this.columns = new OO.ui.HorizontalLayout( $.extend( {}, config, {
+	this.columns = new OO.ui.HorizontalLayout($.extend({}, config, {
 		continuous: true,
 		expanded: true,
-		classes: [ 'cx-widget__columns' ],
-		items: [ this.translationViewContainer, this.toolsColumn ]
-	} ) );
+		classes: ['cx-widget__columns'],
+		items: [this.translationViewContainer, this.toolsColumn]
+	}));
 
 	// Configuration initialization
-	this.config = $.extend( {}, config, {
+	this.config = $.extend({}, config, {
 		continuous: true,
 		expanded: false,
-		items: [ this.columns ],
-		classes: [ 'cx-translation-view' ],
+		items: [this.columns],
+		classes: ['cx-translation-view'],
 		scrollable: false,
 		padded: false
-	} );
+	});
 
 	// Parent constructor
-	mw.cx.ui.TranslationView.super.call( this, this.config );
+	mw.cx.ui.TranslationView.super.call(this, this.config);
 
 	// Events
-	this.targetColumn.titleWidget.connect( this, {
+	this.targetColumn.titleWidget.connect(this, {
 		focus: 'onFocus',
 		blur: 'onBlur'
-	} );
+	});
 };
 
 /* Inheritance */
 
-OO.inheritClass( mw.cx.ui.TranslationView, OO.ui.StackLayout );
+OO.inheritClass(mw.cx.ui.TranslationView, OO.ui.StackLayout);
 
 /* Events */
 
@@ -98,17 +99,17 @@ OO.inheritClass( mw.cx.ui.TranslationView, OO.ui.StackLayout );
  * @param {number} targetOffsetTop Pixel offset of the target section
  * @param {number} sectionNumber The number in the source/target section id attribute
  */
-mw.cx.ui.TranslationView.static.alignSectionPair = function ( sourceOffsetTop, targetOffsetTop, sectionNumber ) {
-	const sourceNode = document.getElementById( 'cxSourceSection' + sectionNumber ),
-		targetNode = document.getElementById( 'cxTargetSection' + sectionNumber );
+mw.cx.ui.TranslationView.static.alignSectionPair = function (sourceOffsetTop, targetOffsetTop, sectionNumber) {
+	const sourceNode = document.getElementById('cxSourceSection' + sectionNumber),
+		targetNode = document.getElementById('cxTargetSection' + sectionNumber);
 
-	function isSubclass( x, y ) {
-		return x && ( x.constructor === y || x.constructor instanceof y );
+	function isSubclass(x, y) {
+		return x && (x.constructor === y || x.constructor instanceof y);
 	}
-	if ( !sourceNode || !targetNode ) {
+	if (!sourceNode || !targetNode) {
 		return;
 	}
-	const viewNode = $.data( targetNode, 'view' );
+	const viewNode = $.data(targetNode, 'view');
 	sourceNode.style.marginTop = '';
 	targetNode.style.marginTop = '';
 	// Reset heights before we do calculations.
@@ -118,10 +119,10 @@ mw.cx.ui.TranslationView.static.alignSectionPair = function ( sourceOffsetTop, t
 		sourceOffsetTop + sourceNode.offsetTop,
 		targetOffsetTop + targetNode.offsetTop
 	);
-	sourceNode.style.marginTop = ( offsetTop - sourceOffsetTop - sourceNode.offsetTop ) + 'px';
-	targetNode.style.marginTop = ( offsetTop - targetOffsetTop - targetNode.offsetTop ) + 'px';
-	if ( isSubclass( viewNode, ve.ce.CXPlaceholderNode ) || isSubclass( viewNode, ve.ce.CXSectionNode ) ) {
-		if ( sourceNode.offsetHeight > targetNode.offsetHeight ) {
+	sourceNode.style.marginTop = (offsetTop - sourceOffsetTop - sourceNode.offsetTop) + 'px';
+	targetNode.style.marginTop = (offsetTop - targetOffsetTop - targetNode.offsetTop) + 'px';
+	if (isSubclass(viewNode, ve.ce.CXPlaceholderNode) || isSubclass(viewNode, ve.ce.CXSectionNode)) {
+		if (sourceNode.offsetHeight > targetNode.offsetHeight) {
 			targetNode.style.height = sourceNode.offsetHeight + 'px';
 		} else {
 			sourceNode.style.height = targetNode.offsetHeight + 'px';
@@ -131,13 +132,13 @@ mw.cx.ui.TranslationView.static.alignSectionPair = function ( sourceOffsetTop, t
 
 /* Methods */
 
-mw.cx.ui.TranslationView.prototype.showCategories = function ( categoryUI ) {
+mw.cx.ui.TranslationView.prototype.showCategories = function (categoryUI) {
 	this.categoryUI = categoryUI;
 
-	this.sourceColumn.setCategoryCount( categoryUI.getSourceCategoryCount() );
-	this.sourceColumn.setCategoryListing( categoryUI.getSourceCategoryListing() );
-	this.targetColumn.setCategoryCount( categoryUI.getTargetCategoryCount() );
-	this.targetColumn.setCategoryListing( categoryUI.getTargetCategoryListing() );
+	this.sourceColumn.setCategoryCount(categoryUI.getSourceCategoryCount());
+	this.sourceColumn.setCategoryListing(categoryUI.getSourceCategoryListing());
+	this.targetColumn.setCategoryCount(categoryUI.getTargetCategoryCount());
+	this.targetColumn.setCategoryListing(categoryUI.getTargetCategoryListing());
 };
 
 /**
@@ -149,8 +150,8 @@ mw.cx.ui.TranslationView.prototype.showCategories = function ( categoryUI ) {
  * @param {Mixed} data Element data.
  * @param {OO.ui.ButtonWidget[]} buttons Array of additional buttons to add to infobar.
  */
-mw.cx.ui.TranslationView.prototype.showMessage = function ( type, message, details, data, buttons ) {
-	this.infobar.showMessage( type, message, details, data, buttons );
+mw.cx.ui.TranslationView.prototype.showMessage = function (type, message, details, data, buttons) {
+	this.infobar.showMessage(type, message, details, data, buttons);
 };
 
 /**
@@ -158,37 +159,37 @@ mw.cx.ui.TranslationView.prototype.showMessage = function ( type, message, detai
  * @param {string} issueName Name of the issue to be displayed when infobar message is closed
  * @param {string} type 'error' or 'warning'
  */
-mw.cx.ui.TranslationView.prototype.showViewIssuesMessage = function ( message, issueName, type ) {
-	const button = new OO.ui.ButtonWidget( {
+mw.cx.ui.TranslationView.prototype.showViewIssuesMessage = function (message, issueName, type) {
+	const button = new OO.ui.ButtonWidget({
 		framed: false,
-		flags: [ 'progressive' ],
-		label: mw.msg( 'cx-infobar-view-issues' )
-	} );
+		flags: ['progressive'],
+		label: mw.msg('cx-infobar-view-issues')
+	});
 
-	button.connect( this, { click: [ 'displayIssueDetails', issueName ] } );
+	button.connect(this, { click: ['displayIssueDetails', issueName] });
 
-	this.showMessage( type, message, null, issueName, [ button ] );
+	this.showMessage(type, message, null, issueName, [button]);
 };
 
 /**
  * @param {string} issueName Name of the issue to be displayed when infobar message is closed
  */
-mw.cx.ui.TranslationView.prototype.displayIssueDetails = function ( issueName ) {
+mw.cx.ui.TranslationView.prototype.displayIssueDetails = function (issueName) {
 	const issueCard = this.toolsColumn.issueCard;
 
-	if ( !issueCard ) {
-		throw new Error( 'Issue card is not initialized' );
+	if (!issueCard) {
+		throw new Error('Issue card is not initialized');
 	}
 
-	issueCard.openIssueByName( issueName );
+	issueCard.openIssueByName(issueName);
 	this.clearMessages();
 };
 
 /**
  * @param {Mixed} messageData
  */
-mw.cx.ui.TranslationView.prototype.removeMessage = function ( messageData ) {
-	this.infobar.removeMessage( messageData );
+mw.cx.ui.TranslationView.prototype.removeMessage = function (messageData) {
+	this.infobar.removeMessage(messageData);
 };
 
 /**
@@ -198,14 +199,14 @@ mw.cx.ui.TranslationView.prototype.clearMessages = function () {
 	this.infobar.clearMessages();
 };
 
-mw.cx.ui.TranslationView.prototype.setStatusMessage = function ( message ) {
-	this.translationHeader.setStatusMessage( message );
+mw.cx.ui.TranslationView.prototype.setStatusMessage = function (message) {
+	this.translationHeader.setStatusMessage(message);
 };
 
-mw.cx.ui.TranslationView.prototype.showConflictWarning = function ( translatorName, translatorGender ) {
-	mw.loader.using( 'ext.cx.translation.conflict' ).then( function () {
-		mw.hook( 'mw.cx.translation.conflict' ).fire( translatorName, translatorGender );
-	} );
+mw.cx.ui.TranslationView.prototype.showConflictWarning = function (translatorName, translatorGender) {
+	mw.loader.using('ext.cx.translation.conflict').then(function () {
+		mw.hook('mw.cx.translation.conflict').fire(translatorName, translatorGender);
+	});
 };
 
 /**
@@ -213,28 +214,28 @@ mw.cx.ui.TranslationView.prototype.showConflictWarning = function ( translatorNa
  * @param {boolean} hasErrors
  * @fires hasTranslationIssues
  */
-mw.cx.ui.TranslationView.prototype.onTranslationIssues = function ( nodesWithIssues, hasErrors ) {
-	if ( hasErrors ) {
+mw.cx.ui.TranslationView.prototype.onTranslationIssues = function (nodesWithIssues, hasErrors) {
+	if (hasErrors) {
 		// TODO: Do this in target#onTranslationIssues
-		ve.init.target.publishButton.setDisabled( true );
+		ve.init.target.publishButton.setDisabled(true);
 	}
 
-	this.emit( 'hasTranslationIssues', hasErrors );
-	this.toolsColumn.showIssues( nodesWithIssues );
+	this.emit('hasTranslationIssues', hasErrors);
+	this.toolsColumn.showIssues(nodesWithIssues);
 };
 
 /**
  * @param {Mixed[]} nodesWithIssues
  * @fires hasTranslationIssues
  */
-mw.cx.ui.TranslationView.prototype.onIssuesResolved = function ( nodesWithIssues ) {
-	if ( nodesWithIssues.length === 0 ) {
+mw.cx.ui.TranslationView.prototype.onIssuesResolved = function (nodesWithIssues) {
+	if (nodesWithIssues.length === 0) {
 		this.toolsColumn.hideIssues();
-		this.emit( 'hasTranslationIssues', false );
+		this.emit('hasTranslationIssues', false);
 		return;
 	}
 
-	this.toolsColumn.showIssues( nodesWithIssues );
+	this.toolsColumn.showIssues(nodesWithIssues);
 };
 
 /**
@@ -245,29 +246,29 @@ mw.cx.ui.TranslationView.prototype.alignTitles = function () {
 	const $sourceTitleWidget = this.sourceColumn.getTitleWidget().$element,
 		$targetTitleWidget = this.targetColumn.getTitleWidget().$element;
 
-	$sourceTitleWidget.css( 'min-height', '' );
-	$targetTitleWidget.css( 'min-height', '' );
+	$sourceTitleWidget.css('min-height', '');
+	$targetTitleWidget.css('min-height', '');
 
 	const height = Math.max(
 		$sourceTitleWidget.outerHeight(),
 		$targetTitleWidget.outerHeight()
 	);
 
-	$sourceTitleWidget.css( 'min-height', height );
-	$targetTitleWidget.css( 'min-height', height );
+	$sourceTitleWidget.css('min-height', height);
+	$targetTitleWidget.css('min-height', height);
 };
 
 mw.cx.ui.TranslationView.prototype.onFocus = function () {
-	this.toolsColumn.toolContainer.$element.addClass( 'cx-column-tools-container--contextual' );
+	this.toolsColumn.toolContainer.$element.addClass('cx-column-tools-container--contextual');
 };
 
 mw.cx.ui.TranslationView.prototype.onBlur = function () {
-	this.toolsColumn.toolContainer.$element.removeClass( 'cx-column-tools-container--contextual' );
+	this.toolsColumn.toolContainer.$element.removeClass('cx-column-tools-container--contextual');
 };
 
 /**
  * Add a CSS class to translation view that marks the current mode as section translation
  */
 mw.cx.ui.TranslationView.prototype.markSectionTranslation = function () {
-	this.$element.addClass( 'cx-sx-mode' );
+	this.$element.addClass('cx-sx-mode');
 };

@@ -20,11 +20,11 @@
  * @param {Object} config
  * @param {Function} [config.onDiscard] Callback triggered after selected source page is discarded
  */
-mw.cx.SelectedSourcePage = function ( siteMapper, config ) {
+mw.cx.SelectedSourcePage = function (siteMapper, config) {
 	this.siteMapper = siteMapper;
-	this.config = $.extend( {
+	this.config = $.extend({
 		campaign: new mw.Uri().query.campaign
-	}, config );
+	}, config);
 
 	this.onDiscard = this.config.onDiscard;
 	this.sourceTitle = null;
@@ -51,93 +51,93 @@ mw.cx.SelectedSourcePage = function ( siteMapper, config ) {
 };
 
 mw.cx.SelectedSourcePage.prototype.init = function () {
-	this.validator = new mw.cx.ContentTranslationValidator( this.siteMapper );
+	this.validator = new mw.cx.ContentTranslationValidator(this.siteMapper);
 
-	this.languageFilter = new mw.cx.ui.LanguageFilter( {
-		onSourceLanguageChange: this.sourceLanguageChangeHandler.bind( this ),
-		onTargetLanguageChange: this.targetLanguageChangeHandler.bind( this )
-	} );
-	this.bookmarkButton = new OO.ui.ButtonWidget( {
+	this.languageFilter = new mw.cx.ui.LanguageFilter({
+		onSourceLanguageChange: this.sourceLanguageChangeHandler.bind(this),
+		onTargetLanguageChange: this.targetLanguageChangeHandler.bind(this)
+	});
+	this.bookmarkButton = new OO.ui.ButtonWidget({
 		framed: false,
 		icon: 'bookmarkOutline'
-	} );
-	this.discardButton = new OO.ui.ButtonWidget( {
+	});
+	this.discardButton = new OO.ui.ButtonWidget({
 		framed: false,
 		icon: 'close',
-		classes: [ 'cx-selected-source-page__discard' ]
-	} );
+		classes: ['cx-selected-source-page__discard']
+	});
 
 	this.render();
 	this.listen();
 };
 
 mw.cx.SelectedSourcePage.prototype.render = function () {
-	this.$image = $( '<div>' )
-		.addClass( 'cx-selected-source-page__image' );
+	this.$image = $('<div>')
+		.addClass('cx-selected-source-page__image');
 
-	this.$link = $( '<a>' )
-		.addClass( 'cx-selected-source-page__link' )
-		.prop( {
+	this.$link = $('<a>')
+		.addClass('cx-selected-source-page__link')
+		.prop({
 			lang: this.languageFilter.getSourceLanguage(),
-			dir: $.uls.data.getDir( this.languageFilter.getSourceLanguage() )
-		} );
-	const $linkContainer = $( '<span>' )
-		.append( this.$link );
+			dir: $.uls.data.getDir(this.languageFilter.getSourceLanguage())
+		});
+	const $linkContainer = $('<span>')
+		.append(this.$link);
 
-	const languageCountIcon = new OO.ui.IconWidget( {
+	const languageCountIcon = new OO.ui.IconWidget({
 		icon: 'language',
-		classes: [ 'cx-selected-source-page__language-count' ]
-	} );
+		classes: ['cx-selected-source-page__language-count']
+	});
 	this.languageCount = new OO.ui.LabelWidget();
-	this.viewsCount = new OO.ui.LabelWidget( {
-		classes: [ 'cx-selected-source-page__views-count' ]
-	} );
-	const $metrics = $( '<div>' )
-		.addClass( 'cx-selected-source-page__metrics' )
-		.append( languageCountIcon.$element, this.languageCount.$element, this.viewsCount.$element );
+	this.viewsCount = new OO.ui.LabelWidget({
+		classes: ['cx-selected-source-page__views-count']
+	});
+	const $metrics = $('<div>')
+		.addClass('cx-selected-source-page__metrics')
+		.append(languageCountIcon.$element, this.languageCount.$element, this.viewsCount.$element);
 
-	const $info = $( '<div>' )
-		.addClass( 'cx-selected-source-page__info' )
-		.append( $linkContainer, $metrics );
+	const $info = $('<div>')
+		.addClass('cx-selected-source-page__info')
+		.append($linkContainer, $metrics);
 
-	const $container = $( '<div>' )
-		.addClass( 'cx-selected-source-page__container' )
+	const $container = $('<div>')
+		.addClass('cx-selected-source-page__container')
 		.append(
 			this.$image,
 			$info,
-			$( '<div>' ).addClass( 'cx-selected-source-page__spacer' ),
+			$('<div>').addClass('cx-selected-source-page__spacer'),
 			this.bookmarkButton.$element,
 			this.languageFilter.$element,
 			this.discardButton.$element
 		);
 
-	this.$messageBar = $( '<div>' )
-		.addClass( 'cx-selected-source-page__messagebar' );
-	this.$messageText = $( '<span>' )
-		.addClass( 'cx-selected-source-page__messagebar-text' );
+	this.$messageBar = $('<div>')
+		.addClass('cx-selected-source-page__messagebar');
+	this.$messageText = $('<span>')
+		.addClass('cx-selected-source-page__messagebar-text');
 	this.$messageBar
-		.append( this.$messageText )
+		.append(this.$messageText)
 		.hide();
 
-	const translateButtonLabel = mw.msg( 'cx-selected-source-page-start-translation-button' );
-	this.startTranslationButton = new OO.ui.ButtonWidget( {
-		flags: [ 'primary', 'progressive' ],
+	const translateButtonLabel = mw.msg('cx-selected-source-page-start-translation-button');
+	this.startTranslationButton = new OO.ui.ButtonWidget({
+		flags: ['primary', 'progressive'],
 		label: translateButtonLabel
-	} );
+	});
 
-	const $license = $( '<div>' )
-		.addClass( 'cx-selected-source-page__license' )
-		.append( mw.message( 'cx-license-agreement', translateButtonLabel ).parseDom() );
+	const $license = $('<div>')
+		.addClass('cx-selected-source-page__license')
+		.append(mw.message('cx-license-agreement', translateButtonLabel).parseDom());
 
-	$license.find( 'a' ).prop( 'target', '_blank' );
+	$license.find('a').prop('target', '_blank');
 
-	const $actions = $( '<div>' )
-		.addClass( 'cx-selected-source-page__actions' )
-		.append( this.startTranslationButton.$element );
+	const $actions = $('<div>')
+		.addClass('cx-selected-source-page__actions')
+		.append(this.startTranslationButton.$element);
 
-	this.$element = $( '<div>' )
-		.addClass( 'cx-selected-source-page' )
-		.append( $container, this.$messageBar, $license, $actions );
+	this.$element = $('<div>')
+		.addClass('cx-selected-source-page')
+		.append($container, this.$messageBar, $license, $actions);
 };
 
 mw.cx.SelectedSourcePage.prototype.hide = function () {
@@ -145,22 +145,22 @@ mw.cx.SelectedSourcePage.prototype.hide = function () {
 };
 
 mw.cx.SelectedSourcePage.prototype.focusStartTranslationButton = function () {
-	this.startTranslationButton.$button.trigger( 'focus' );
+	this.startTranslationButton.$button.trigger('focus');
 };
 
 mw.cx.SelectedSourcePage.prototype.listen = function () {
-	this.startTranslationButton.connect( this, { click: 'startPageInCX' } );
-	this.discardButton.connect( this, { click: 'discardDialog' } );
+	this.startTranslationButton.connect(this, { click: 'startPageInCX' });
+	this.discardButton.connect(this, { click: 'discardDialog' });
 
-	this.bookmarkButton.connect( this, { click: 'onBookmarkButtonClick' } );
+	this.bookmarkButton.connect(this, { click: 'onBookmarkButtonClick' });
 };
 
 /**
  * Change "favorite" button icon to filled bookmark
  */
 mw.cx.SelectedSourcePage.prototype.setFilledIcon = function () {
-	this.bookmarkButton.setFlags( 'progressive' );
-	this.bookmarkButton.setIcon( 'bookmark' );
+	this.bookmarkButton.setFlags('progressive');
+	this.bookmarkButton.setIcon('bookmark');
 };
 
 /**
@@ -168,7 +168,7 @@ mw.cx.SelectedSourcePage.prototype.setFilledIcon = function () {
  */
 mw.cx.SelectedSourcePage.prototype.setOutlineIcon = function () {
 	this.bookmarkButton.clearFlags();
-	this.bookmarkButton.setIcon( 'bookmarkOutline' );
+	this.bookmarkButton.setIcon('bookmarkOutline');
 };
 
 /**
@@ -176,10 +176,10 @@ mw.cx.SelectedSourcePage.prototype.setOutlineIcon = function () {
  */
 mw.cx.SelectedSourcePage.prototype.toggleFilledIcon = function () {
 	this.setFilledIcon();
-	this.bookmarkButton.$element.on( {
-		mouseenter: this.setOutlineIcon.bind( this ),
-		mouseleave: this.setFilledIcon.bind( this )
-	} );
+	this.bookmarkButton.$element.on({
+		mouseenter: this.setOutlineIcon.bind(this),
+		mouseleave: this.setFilledIcon.bind(this)
+	});
 };
 
 /**
@@ -187,10 +187,10 @@ mw.cx.SelectedSourcePage.prototype.toggleFilledIcon = function () {
  */
 mw.cx.SelectedSourcePage.prototype.toggleOutlineIcon = function () {
 	this.setOutlineIcon();
-	this.bookmarkButton.$element.on( {
-		mouseenter: this.setFilledIcon.bind( this ),
-		mouseleave: this.setOutlineIcon.bind( this )
-	} );
+	this.bookmarkButton.$element.on({
+		mouseenter: this.setFilledIcon.bind(this),
+		mouseleave: this.setOutlineIcon.bind(this)
+	});
 };
 
 mw.cx.SelectedSourcePage.prototype.onBookmarkButtonClick = function () {
@@ -206,20 +206,20 @@ mw.cx.SelectedSourcePage.prototype.onBookmarkButtonClick = function () {
 		to: this.languageFilter.targetLanguage
 	};
 
-	api.postWithToken( 'csrf', params ).done( function ( response ) {
-		if ( response.cxsuggestionlist.result !== 'success' ) {
+	api.postWithToken('csrf', params).done(function (response) {
+		if (response.cxsuggestionlist.result !== 'success') {
 			return;
 		}
 
-		if ( this.alreadyFavorite ) {
-			mw.notify( mw.msg( 'cx-favorite-removed' ) );
+		if (this.alreadyFavorite) {
+			mw.notify(mw.msg('cx-favorite-removed'));
 			this.toggleOutlineIcon();
 		} else {
-			mw.notify( this.getNotifyMessage() );
+			mw.notify(this.getNotifyMessage());
 			this.toggleFilledIcon();
 		}
 		this.alreadyFavorite = !this.alreadyFavorite;
-	}.bind( this ) );
+	}.bind(this));
 };
 
 /**
@@ -231,12 +231,12 @@ mw.cx.SelectedSourcePage.prototype.onBookmarkButtonClick = function () {
  * @return {string} Messsage to notify user after keeping an article for later.
  */
 mw.cx.SelectedSourcePage.prototype.getNotifyMessage = function () {
-	const selectedOptionWidget = $( '.cx-translation-filter .oo-ui-optionWidget-selected' ).data(),
+	const selectedOptionWidget = $('.cx-translation-filter .oo-ui-optionWidget-selected').data(),
 		selectedView = selectedOptionWidget && selectedOptionWidget.ooUiOptionWidget;
 
 	return selectedView && selectedView.getData() === 'suggestions' ?
-		mw.msg( 'cx-favorite-added-for-later' ) :
-		mw.msg( 'cx-favorite-added-for-later-detail' );
+		mw.msg('cx-favorite-added-for-later') :
+		mw.msg('cx-favorite-added-for-later-detail');
 };
 
 mw.cx.SelectedSourcePage.prototype.discardDialog = function () {
@@ -244,25 +244,25 @@ mw.cx.SelectedSourcePage.prototype.discardDialog = function () {
 
 	// Discard selected source image
 	this.$image
-		.removeAttr( 'style' )
-		.removeClass( 'oo-ui-iconElement-icon' )
-		.attr( 'class', function ( i, className ) {
-			return className.replace( /oo-ui-icon-\S+/, '' );
-		} );
+		.removeAttr('style')
+		.removeClass('oo-ui-iconElement-icon')
+		.attr('class', function (i, className) {
+			return className.replace(/oo-ui-icon-\S+/, '');
+		});
 
 	this.alreadyFavorite = false;
-	this.bookmarkButton.toggle( true );
+	this.bookmarkButton.toggle(true);
 	this.setOutlineIcon();
 	// Reset source titles, as there is no selected source
 	this.sourcePageTitles = {};
 	// Reset source and target ULS to show all source and target languages
-	this.languageFilter.fillSourceLanguages( null, true );
-	this.languageFilter.fillTargetLanguages( null, true );
+	this.languageFilter.fillSourceLanguages(null, true);
+	this.languageFilter.fillTargetLanguages(null, true);
 
-	$( 'html' ).trigger( 'click' ); // Not sure why click doesn't pass through OOUI button to HTML element
+	$('html').trigger('click'); // Not sure why click doesn't pass through OOUI button to HTML element
 	// where listener is closing the ULS on outside clicks. Maybe some OOUI change?
 
-	if ( this.onDiscard ) {
+	if (this.onDiscard) {
 		this.onDiscard();
 	}
 };
@@ -272,16 +272,16 @@ mw.cx.SelectedSourcePage.prototype.discardDialog = function () {
  *
  * @param {string} language Language code
  */
-mw.cx.SelectedSourcePage.prototype.changeSelectedSourceTitle = function ( language ) {
-	const title = this.sourcePageTitles[ language ];
+mw.cx.SelectedSourcePage.prototype.changeSelectedSourceTitle = function (language) {
+	const title = this.sourcePageTitles[language];
 
-	if ( title ) {
-		const href = this.siteMapper.getPageUrl( language, title );
-		this.$link.prop( {
+	if (title) {
+		const href = this.siteMapper.getPageUrl(language, title);
+		this.$link.prop({
 			href: href,
 			title: title,
 			text: title
-		} ).toggleClass( 'cx-selected-source-page__link--long', title.length >= 60 );
+		}).toggleClass('cx-selected-source-page__link--long', title.length >= 60);
 		this.sourceTitle = title;
 	}
 };
@@ -291,19 +291,19 @@ mw.cx.SelectedSourcePage.prototype.changeSelectedSourceTitle = function ( langua
  *
  * @param {string} language Language code.
  */
-mw.cx.SelectedSourcePage.prototype.sourceLanguageChangeHandler = function ( language ) {
-	this.changeSelectedSourceTitle( language );
-	this.getPageInfo( this.sourcePageTitles[ language ] ).done( function ( data ) {
-		this.renderPageViews( data.pageviews );
-	}.bind( this ) ).fail( function ( error ) {
-		mw.log( 'Error getting page info for ' + this.sourcePageTitles[ language ] + '. ' + error );
-	}.bind( this ) );
+mw.cx.SelectedSourcePage.prototype.sourceLanguageChangeHandler = function (language) {
+	this.changeSelectedSourceTitle(language);
+	this.getPageInfo(this.sourcePageTitles[language]).done(function (data) {
+		this.renderPageViews(data.pageviews);
+	}.bind(this)).fail(function (error) {
+		mw.log('Error getting page info for ' + this.sourcePageTitles[language] + '. ' + error);
+	}.bind(this));
 
 	this.initBookmark();
 	this.check();
 };
 
-mw.cx.SelectedSourcePage.prototype.setSourceTitle = function ( sourceTitle ) {
+mw.cx.SelectedSourcePage.prototype.setSourceTitle = function (sourceTitle) {
 	this.sourceTitle = sourceTitle;
 };
 
@@ -317,7 +317,7 @@ mw.cx.SelectedSourcePage.prototype.targetLanguageChangeHandler = function () {
 	this.check();
 };
 
-mw.cx.SelectedSourcePage.prototype.setTargetTitle = function ( targetTitle ) {
+mw.cx.SelectedSourcePage.prototype.setTargetTitle = function (targetTitle) {
 	this.targetTitle = targetTitle;
 };
 
@@ -334,83 +334,89 @@ mw.cx.SelectedSourcePage.prototype.setTargetTitle = function ( targetTitle ) {
  * @param {string} [config.imageIcon] OOUI class of selected page placeholder icon
  * @param {number} [config.numOfLanguages] Number of different language versions for selected source page
  */
-mw.cx.SelectedSourcePage.prototype.setData = function ( pageTitle, href, config ) {
-	this.languageFilter.setSourceLanguageNoChecks( config.sourceLanguage );
-	this.languageFilter.setTargetLanguageNoChecks( config.targetLanguage );
+mw.cx.SelectedSourcePage.prototype.setData = function (pageTitle, href, config) {
+	this.languageFilter.setSourceLanguageNoChecks(config.sourceLanguage);
+	this.languageFilter.setTargetLanguageNoChecks(config.targetLanguage);
 
-	const params = $.extend( {
-		prop: [ 'langlinks', 'pageviews' ],
+	const params = $.extend({
+		prop: ['langlinks', 'pageviews'],
 		redirects: true,
 		lllimit: 'max'
-	}, config.params );
+	}, config.params);
 
-	if ( config.imageUrl ) {
+	if (config.imageUrl) {
 		this.$image
-			.addClass( 'mw-no-invert' )
-			.css( 'background-image', 'url( ' + config.imageUrl + ')' );
+			.addClass('mw-no-invert')
+			.css('background-image', 'url( ' + config.imageUrl + ')');
 	} else {
 		// eslint-disable-next-line mediawiki/class-doc
-		this.$image.addClass( 'oo-ui-iconElement-icon oo-ui-icon-' + config.imageIcon );
+		this.$image.addClass('oo-ui-iconElement-icon oo-ui-icon-' + config.imageIcon);
 	}
 
-	this.$link.prop( {
+	this.$link.prop({
 		href: href,
 		title: pageTitle,
 		target: '_blank',
 		text: pageTitle
-	} );
-	this.$link.toggleClass( 'cx-selected-source-page__link--long', pageTitle.length >= 60 );
+	});
+	this.$link.toggleClass('cx-selected-source-page__link--long', pageTitle.length >= 60);
 
-	this.getPageInfo( pageTitle, params ).done( function ( data ) {
-		this.renderPageViews( data.pageviews );
+	this.getPageInfo(pageTitle, params).done(function (data) {
+		this.renderPageViews(data.pageviews);
 
 		var numOfLanguages =
 			config.numOfLanguages ||
-			( OO.getProp( data, 'langlinkscount' ) || 0 ) + 1;
-		if ( data.langlinks ) {
+			(OO.getProp(data, 'langlinkscount') || 0) + 1;
+		if (data.langlinks) {
 			numOfLanguages = data.langlinks.length + 1;
 		}
-		this.languageCount.setLabel( mw.language.convertNumber( numOfLanguages ));
+		this.languageCount.setLabel(mw.language.convertNumber(numOfLanguages));
 
 		// Reset source page titles
 		this.sourcePageTitles = {};
 		// Extract results data and create sourcePageTitles mapping
-		if ( data.langlinks ) {
-			data.langlinks.forEach( function ( element ) {
+		if (data.langlinks) {
+			data.langlinks.forEach(function (element) {
 				const langCode = element.lang;
-				const title = element[ '*' ];
+				const title = element['*'];
 
-				this.sourcePageTitles[ langCode ] = title;
-			}, this );
+				this.sourcePageTitles[langCode] = title;
+			}, this);
 		}
 		// Include chosen source page title (not returned by langlinks API)
-		this.sourcePageTitles[ this.languageFilter.getSourceLanguage() ] = pageTitle;
+		this.sourcePageTitles[this.languageFilter.getSourceLanguage()] = pageTitle;
 
-		const languagesPageExistsIn = Object.keys( this.sourcePageTitles );
-		const languageDecorator = function ( $language, languageCode ) {
+		const languagesPageExistsIn = Object.keys(this.sourcePageTitles);
+		const languageDecorator = function ($language, languageCode) {
+
+			// if (languagesPageExistsIn.indexOf(languageCode) < 0) {
+			// 	$language.css('font-weight', 'bold');
+			// }
+
+			// By: Ibrahem Qasim
 			// hide en, simple code
-			if ( languageCode === 'en' || languageCode === 'simple' ) {
-				$language.css( 'display', 'none' );
-			} else if ( languagesPageExistsIn.indexOf( languageCode ) < 0 ) {
-				$language.css( 'font-weight', 'bold' );
+			if (languageCode === 'en' || languageCode === 'simple') {
+				$language.css('display', 'none');
+			} else if (languagesPageExistsIn.indexOf(languageCode) < 0) {
+				$language.css('font-weight', 'bold');
 			} else {
 				// hide already in languages
 				// $language.css( 'display', 'none' );
 			}
 		};
-
+		// By: Ibrahem Qasim
 		// disable this, show only mdwiki
-		// this.languageFilter.fillSourceLanguages( languagesPageExistsIn, true, {
+		// this.languageFilter.fillSourceLanguages(languagesPageExistsIn, true, {
 		// 	ulsPurpose: 'cx-selectedpage-source'
-		// } );
-		this.languageFilter.fillTargetLanguages( null, true, {
+		// });
+		this.languageFilter.fillTargetLanguages(null, true, {
 			ulsPurpose: 'cx-selectedpage-target',
 			languageDecorator: languageDecorator
-		} );
-		this.languageFilter.setValidSourceLanguages( languagesPageExistsIn );
-	}.bind( this ) ).fail( function ( error ) {
-		mw.log( 'Error getting page info for ' + pageTitle + '. ' + error );
-	} );
+		});
+		this.languageFilter.setValidSourceLanguages(languagesPageExistsIn);
+	}.bind(this)).fail(function (error) {
+		mw.log('Error getting page info for ' + pageTitle + '. ' + error);
+	});
 
 	this.sourceTitle = pageTitle;
 	// Reset target title.
@@ -427,82 +433,82 @@ mw.cx.SelectedSourcePage.prototype.setData = function ( pageTitle, href, config 
  * @param {Object} [params] Optional parameter used for fetching additional source data.
  * @return {jQuery.Promise} Returns thenable promise, so langlinks can be processed if necessary.
  */
-mw.cx.SelectedSourcePage.prototype.getPageInfo = function ( title, params ) {
-	if ( !title ) {
-		throw new Error( 'Title is mandatory parameter' );
+mw.cx.SelectedSourcePage.prototype.getPageInfo = function (title, params) {
+	if (!title) {
+		throw new Error('Title is mandatory parameter');
 	}
 
-	const api = this.siteMapper.getApi( this.languageFilter.getSourceLanguage() );
-	params = $.extend( {
+	const api = this.siteMapper.getApi(this.languageFilter.getSourceLanguage());
+	params = $.extend({
 		action: 'query',
 		// If new prop array is provided in params, this one is overridden
-		prop: [ 'pageviews' ],
+		prop: ['pageviews'],
 		titles: title,
 		pvipdays: 7
-	}, params );
+	}, params);
 
-	return api.get( params ).then( function ( data ) {
-		const page = OO.getProp( data, 'query', 'pages' );
+	return api.get(params).then(function (data) {
+		const page = OO.getProp(data, 'query', 'pages');
 
-		if ( !page ) {
-			return $.Deferred().reject( 'No page data' ).promise();
+		if (!page) {
+			return $.Deferred().reject('No page data').promise();
 		}
 
 		// Only one title was passed in titles params, so we expect one result
-		const pageId = Object.keys( page )[ 0 ];
-		if ( pageId === '-1' ) {
+		const pageId = Object.keys(page)[0];
+		if (pageId === '-1') {
 			// Page does not exist
-			return $.Deferred().reject( 'Requested page does not exist' ).promise();
+			return $.Deferred().reject('Requested page does not exist').promise();
 		}
 
-		return page[ pageId ];
-	}, function ( response ) {
+		return page[pageId];
+	}, function (response) {
 		// In case of failure, fallback to all source and target languages
 		this.sourcePageTitles = {};
-		this.languageFilter.fillSourceLanguages( null, true );
-		this.languageFilter.fillTargetLanguages( null, true );
+		this.languageFilter.fillSourceLanguages(null, true);
+		this.languageFilter.fillTargetLanguages(null, true);
 
-		return $.Deferred().reject( 'Reason: ' + response ).promise();
-	}.bind( this ) );
+		return $.Deferred().reject('Reason: ' + response).promise();
+	}.bind(this));
 };
 
-mw.cx.SelectedSourcePage.prototype.renderPageViews = function ( pageViewData ) {
+mw.cx.SelectedSourcePage.prototype.renderPageViews = function (pageViewData) {
 	let pageViews = 0;
 
-	if ( !pageViewData ) {
+	if (!pageViewData) {
 		return;
 	}
 
-	for ( const date in pageViewData ) {
-		pageViews += pageViewData[ date ];
+	for (const date in pageViewData) {
+		pageViews += pageViewData[date];
 	}
 
 	this.viewsCount.setLabel(
-		mw.msg( 'cx-selected-source-page-view-count', mw.language.convertNumber( pageViews ) )
+		mw.msg('cx-selected-source-page-view-count', mw.language.convertNumber(pageViews))
 	);
 };
 
 mw.cx.SelectedSourcePage.prototype.initBookmark = function () {
 	this.alreadyFavorite = false;
-	this.bookmarkButton.toggle( true );
+	this.bookmarkButton.toggle(true);
 	this.setOutlineIcon();
 
 	this.isAlreadyFavorite(
 		this.languageFilter.getSourceLanguage(),
 		this.languageFilter.getTargetLanguage(),
 		this.sourceTitle
-	).then( function ( alreadyFavorite ) {
+	).then(function (alreadyFavorite) {
 		this.alreadyFavorite = alreadyFavorite;
 
-		if ( alreadyFavorite ) {
+		if (alreadyFavorite) {
 			this.toggleFilledIcon();
 		} else {
 			this.toggleOutlineIcon();
 		}
-	}.bind( this ) );
+	}.bind(this));
 };
 
-mw.cx.SelectedSourcePage.prototype.isAlreadyFavorite = function ( sourceLanguage, targetLanguage, title ) {
+mw.cx.SelectedSourcePage.prototype.isAlreadyFavorite = function (sourceLanguage, targetLanguage, title) {
 	const api = new mw.Api();
 
 	const params = {
@@ -516,9 +522,9 @@ mw.cx.SelectedSourcePage.prototype.isAlreadyFavorite = function ( sourceLanguage
 		to: targetLanguage
 	};
 
-	return api.postWithToken( 'csrf', params ).then( function ( response ) {
+	return api.postWithToken('csrf', params).then(function (response) {
 		return response.cxsuggestionlist.listaction;
-	} );
+	});
 };
 
 /**
@@ -534,9 +540,9 @@ mw.cx.SelectedSourcePage.prototype.startPageInCX = function () {
 	this.validator.isTitleExistInLanguage(
 		sourceLanguage,
 		originalSourceTitle
-	).done( function ( sourceTitle ) {
+	).done(function (sourceTitle) {
 		// Set CX token as cookie.
-		siteMapper.setCXToken( sourceLanguage, targetLanguage, sourceTitle );
+		siteMapper.setCXToken(sourceLanguage, targetLanguage, sourceTitle);
 
 		location.href = siteMapper.getCXUrl(
 			sourceTitle,
@@ -545,7 +551,7 @@ mw.cx.SelectedSourcePage.prototype.startPageInCX = function () {
 			targetLanguage,
 			{ campaign: this.config.campaign }
 		);
-	}.bind( this ) );
+	}.bind(this));
 };
 
 /**
@@ -559,7 +565,7 @@ mw.cx.SelectedSourcePage.prototype.check = function () {
 	this.$messageBar.hide();
 
 	// Whether the target title, if given, exists in the target wiki
-	const titleCheck = this.validator.isTitleExistInLanguage( targetLanguage, targetTitle );
+	const titleCheck = this.validator.isTitleExistInLanguage(targetLanguage, targetTitle);
 	// Whether the source already has a translation linked via language links
 	const translationCheck = this.validator.isTitleConnectedInLanguages(
 		sourceLanguage,
@@ -570,30 +576,30 @@ mw.cx.SelectedSourcePage.prototype.check = function () {
 	$.when(
 		translationCheck,
 		titleCheck
-	).done( function ( existingTranslation, existingTargetTitle ) {
+	).done(function (existingTranslation, existingTargetTitle) {
 		// If there is an existing translation and
 		// the specified target title is in use
-		if ( existingTranslation && existingTargetTitle ) {
+		if (existingTranslation && existingTargetTitle) {
 			this.showPageExistsAndTitleInUseError(
 				existingTranslation,
 				existingTargetTitle,
 				targetLanguage
 			);
-		} else if ( existingTranslation ) {
+		} else if (existingTranslation) {
 			// If there is just an existing translation
-			this.showPageExistsError( existingTranslation, targetLanguage );
-		} else if ( existingTargetTitle ) {
+			this.showPageExistsError(existingTranslation, targetLanguage);
+		} else if (existingTargetTitle) {
 			// If the specified target title is in use
-			this.showTitleInUseError( existingTargetTitle, targetLanguage );
+			this.showTitleInUseError(existingTargetTitle, targetLanguage);
 		}
 
 		// Page exists in target language
-		if ( existingTranslation ) {
+		if (existingTranslation) {
 			// Hide bookmark button if page already exists
-			this.bookmarkButton.toggle( false );
-			this.setTargetTitle( existingTranslation );
+			this.bookmarkButton.toggle(false);
+			this.setTargetTitle(existingTranslation);
 		}
-	}.bind( this ) );
+	}.bind(this));
 };
 
 /**
@@ -608,10 +614,10 @@ mw.cx.SelectedSourcePage.prototype.showPageExistsAndTitleInUseError = function (
 	existingTargetTitle,
 	targetLanguage
 ) {
-	const equivalentTargetPageLink = this.siteMapper.getPageUrl( targetLanguage, equivalentTargetPage );
-	const targetLanguageDisplay = $.uls.data.getAutonym( targetLanguage );
+	const equivalentTargetPageLink = this.siteMapper.getPageUrl(targetLanguage, equivalentTargetPage);
+	const targetLanguageDisplay = $.uls.data.getAutonym(targetLanguage);
 
-	const existingTargetTitleLink = this.siteMapper.getPageUrl( targetLanguage, existingTargetTitle );
+	const existingTargetTitleLink = this.siteMapper.getPageUrl(targetLanguage, existingTargetTitle);
 
 	const message = mw.message(
 		'cx-selected-source-page-error-page-and-title-exist',
@@ -620,7 +626,7 @@ mw.cx.SelectedSourcePage.prototype.showPageExistsAndTitleInUseError = function (
 		existingTargetTitleLink
 	);
 
-	this.showMessage( message );
+	this.showMessage(message);
 };
 
 /**
@@ -629,16 +635,16 @@ mw.cx.SelectedSourcePage.prototype.showPageExistsAndTitleInUseError = function (
  * @param {string} equivalentTargetPage the title of the existing page
  * @param {string} targetLanguage
  */
-mw.cx.SelectedSourcePage.prototype.showPageExistsError = function ( equivalentTargetPage, targetLanguage ) {
-	const equivalentTargetPageLink = this.siteMapper.getPageUrl( targetLanguage, equivalentTargetPage );
-	const targetLanguageDisplay = $.uls.data.getAutonym( targetLanguage );
+mw.cx.SelectedSourcePage.prototype.showPageExistsError = function (equivalentTargetPage, targetLanguage) {
+	const equivalentTargetPageLink = this.siteMapper.getPageUrl(targetLanguage, equivalentTargetPage);
+	const targetLanguageDisplay = $.uls.data.getAutonym(targetLanguage);
 
 	const message = mw.message(
 		'cx-selected-source-page-error-page-exists',
 		equivalentTargetPageLink, targetLanguageDisplay
 	);
 
-	this.showMessage( message );
+	this.showMessage(message);
 };
 
 /**
@@ -647,15 +653,15 @@ mw.cx.SelectedSourcePage.prototype.showPageExistsError = function ( equivalentTa
  * @param {string} existingTargetTitle The title already in use
  * @param {string} targetLanguage
  */
-mw.cx.SelectedSourcePage.prototype.showTitleInUseError = function ( existingTargetTitle, targetLanguage ) {
-	const existingTargetTitleLink = this.siteMapper.getPageUrl( targetLanguage, existingTargetTitle );
+mw.cx.SelectedSourcePage.prototype.showTitleInUseError = function (existingTargetTitle, targetLanguage) {
+	const existingTargetTitleLink = this.siteMapper.getPageUrl(targetLanguage, existingTargetTitle);
 
 	const message = mw.message(
 		'cx-selected-source-page-error-title-in-use',
 		existingTargetTitleLink
 	);
 
-	this.showMessage( message );
+	this.showMessage(message);
 };
 
 /**
@@ -663,16 +669,16 @@ mw.cx.SelectedSourcePage.prototype.showTitleInUseError = function ( existingTarg
  *
  * @param {mw.Message|string} message the message to show
  */
-mw.cx.SelectedSourcePage.prototype.showMessage = function ( message ) {
-	if ( message instanceof mw.Message ) {
+mw.cx.SelectedSourcePage.prototype.showMessage = function (message) {
+	if (message instanceof mw.Message) {
 		this.$messageText.empty();
-		this.$messageText.append( message.parseDom() );
+		this.$messageText.append(message.parseDom());
 	} else {
-		this.$messageText.text( message );
+		this.$messageText.text(message);
 	}
 
-	this.$messageBar.find( 'a' )
-		.attr( 'target', '_blank' );
+	this.$messageBar.find('a')
+		.attr('target', '_blank');
 
 	this.$messageBar.show();
 };

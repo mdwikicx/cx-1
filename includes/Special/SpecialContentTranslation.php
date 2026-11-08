@@ -68,6 +68,7 @@ class SpecialContentTranslation extends SpecialPage {
 
 		if ( !$this->canUserProceed() ) {
 			// return;
+			// By: Ibrahem Qasim
 			// some issue when use mdwiki.org
 			echo "";
 		}
@@ -171,6 +172,7 @@ class SpecialContentTranslation extends SpecialPage {
 		// return $hasToken;
 
 		// issue with medwiki.toolforge.org session
+		// By: Ibrahem Qasim
 		return true;
 	}
 

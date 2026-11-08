@@ -15,7 +15,7 @@ mw.cx.MachineTranslationService = function MwCxMachineTranslationService(
 	sourceLanguage, targetLanguage, siteMapper
 ) {
 	this.sourceLanguage = sourceLanguage;
-
+	// By: Ibrahem Qasim
 	// if (sourceLanguage === 'mdwiki') { this.sourceLanguage = 'en'; }
 	// TODO: mdwiki work
 
@@ -151,9 +151,8 @@ mw.cx.MachineTranslationService.prototype.fetchProviders = function () {
 		$from: this.sourceLanguage,
 		$to: this.targetLanguage
 	});
-
-	// {"mt":["MinT","Google"]}
 	// By: Ibrahem Qasim
+	// {"mt":["MinT","Google"]}
 	if (this.targetLanguage === "or") {
 		return $.Deferred().resolve(["Google"]);
 	}
@@ -262,7 +261,7 @@ mw.cx.MachineTranslationService.prototype.fetchCxServerTokenMdwiki = function ()
 };
 
 mw.cx.MachineTranslationService.prototype.fetchCXServerToken = function () {
-
+	// By: Ibrahem Qasim
 	if (this.sourceLanguage === "mdwiki") {
 		return this.fetchCxServerTokenMdwiki();
 	};
