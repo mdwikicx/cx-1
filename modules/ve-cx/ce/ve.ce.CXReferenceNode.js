@@ -40,12 +40,7 @@ ve.ce.CXReferenceNode.prototype.update = function () {
 	// Parent method
 	ve.ce.CXReferenceNode.super.prototype.update.apply( this, arguments );
 
-	const adaptationInfo = this.model.getAdaptationInfo();
-	if ( adaptationInfo && adaptationInfo.adapted === false ) {
-		this.$link.addClass( 've-ce-cxReferenceNode-unadapted' );
-	} else {
-		this.$link.removeClass( 've-ce-cxReferenceNode-unadapted' );
-	}
+	this.$link.removeClass( 've-ce-cxReferenceNode-unadapted' );
 };
 
 /* Registration */

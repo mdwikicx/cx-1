@@ -48,6 +48,12 @@ ve.dm.CXReferenceNode.static.toDataElement = function ( domElements ) {
 		cxData = {};
 	}
 
+	// When reference adaptation is missing/failed, copy the source reference as is
+	// and mark it as adapted so it is not dropped or reported as missing.
+	if ( cxData && cxData.adapted === false ) {
+		cxData.adapted = true;
+	}
+
 	dataElement.attributes.cx = cxData;
 
 	return dataElement;
@@ -88,9 +94,6 @@ ve.dm.CXReferenceNode.prototype.onAttach = function () {
 	if ( cxData.partial === true ) {
 		title = mw.msg( 'cx-tools-linter-incomplete-reference' );
 		message = mw.message( 'cx-tools-linter-incomplete-reference-message' );
-	} else if ( cxData.adapted === false ) {
-		title = mw.msg( 'cx-tools-linter-reference' );
-		message = mw.message( 'cx-tools-linter-reference-message' );
 	} else {
 		if ( cxData.adapted !== true ) {
 			mw.log.warn(

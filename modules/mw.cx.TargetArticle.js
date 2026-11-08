@@ -93,16 +93,6 @@ mw.cx.TargetArticle.static.getCleanedupContent = function (doc) {
 		}
 	});
 
-	// Remove empty references. Such references are initially marked as unadapted and CX data
-	// is reset upon editing, so we check if reference is still marked as unadapted.
-	Array.prototype.forEach.call(doc.querySelectorAll('.mw-ref'), function (element) {
-		const dataCX = JSON.parse(element.getAttribute('data-cx') || '{}');
-
-		if (dataCX.adapted === false) {
-			element.parentNode.removeChild(element);
-		}
-	});
-
 	// Remove all pathological transclusions if any. Transclusion without any definition can cause
 	// Parsoid errors and hence failing the whole publishing workflow.
 	// Example `<span typeof="mw:Transclusion" data-mw="{}" data-cx="[{&quot;adapted&quot;:false}]" id="mwCH0"></span>`

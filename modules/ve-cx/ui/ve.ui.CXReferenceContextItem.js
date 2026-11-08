@@ -37,14 +37,6 @@
 		OO.inheritClass( contextItem, parentContextItem );
 
 		contextItem.prototype.getRendering = function () {
-			const cxData = this.model.getAttribute( 'cx' ) || {};
-
-			if ( cxData.adapted === false ) {
-				// Reference is not adapted. Use an empty div as content with the same
-				// CSS class that parent class uses for such empty content.
-				return $( '<div>' )
-					.addClass( 've-ui-mwReferenceContextItem-muted' );
-			}
 			return contextItem.super.prototype.getRendering.apply( this, arguments );
 		};
 

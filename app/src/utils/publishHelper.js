@@ -41,16 +41,6 @@ const cleanupHtml = (html) => {
     }
   });
 
-  // Remove empty references. Such references are initially marked as unadapted and CX data
-  // is reset upon editing, so we check if reference is still marked as unadapted.
-  Array.prototype.forEach.call(doc.querySelectorAll(".mw-ref"), (element) => {
-    const dataCX = JSON.parse(element.getAttribute("data-cx") || "{}");
-
-    if (dataCX?.adapted === false) {
-      element.parentNode.removeChild(element);
-    }
-  });
-
   // Remove all data-cx attributes. It is irrelevant for publish, reduces the HTML size.
   Array.prototype.forEach.call(doc.querySelectorAll("[data-cx]"), (element) => {
     element.removeAttribute("data-cx");
