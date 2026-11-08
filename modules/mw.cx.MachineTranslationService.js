@@ -153,7 +153,7 @@ mw.cx.MachineTranslationService.prototype.fetchProviders = function () {
 	});
 
 	// {"mt":["MinT","Google"]}
-	// 2024 By: Ibrahem Qasim
+	// By: Ibrahem Qasim
 	if (this.targetLanguage === "or") {
 		return $.Deferred().resolve(["Google"]);
 	}
