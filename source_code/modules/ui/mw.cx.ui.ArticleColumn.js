@@ -45,7 +45,7 @@ mw.cx.ui.ArticleColumn = function ( config ) {
 	} else {
 		this.titleWidget = new mw.cx.ui.PageTitleWidget(
 			new mw.cx.dm.PageTitleModel(),
-			{ value: config.title, language: config.language }
+			{ value: config.title }
 		);
 	}
 	this.direction = $.uls.data.getDir( config.language );

@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Saving a wiki page created using ContentTranslation.
  * The following special things happen when the page is created:
@@ -42,54 +41,7 @@ use MediaWiki\Title\Title;
 use Wikimedia\ParamValidator\ParamValidator;
 use Wikimedia\ParamValidator\TypeDef\IntegerDef;
 
-function post_to_target($params)
-{
-	// $url = 'https://mdwiki.toolforge.org/Translation_Dashboard/publish/index.php';
-	$url = 'https://mdwiki.toolforge.org/publish/index.php';
-	$ch = curl_init();
-
-	// if ($ch === false) {
-	// 	throw new \RuntimeException('curl_init() failed');
-	// }
-
-	$usr_agent = "WikiProjectMed Translation Dashboard/1.0 (https://mdwiki.toolforge.org/; tools.mdwiki@toolforge.org)";
-
-	curl_setopt($ch, CURLOPT_URL, $url);
-	curl_setopt($ch, CURLOPT_POST, 1);
-	curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($params));
-
-	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-
-	// wikipedia_result: {"response":"Requests must have a user agent"}
-	curl_setopt($ch, CURLOPT_USERAGENT, $usr_agent);
-	curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 15);
-	curl_setopt($ch, CURLOPT_TIMEOUT, 15);
-
-	$response = curl_exec($ch);
-
-	$curlErr   = curl_error($ch);
-	$status    = curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
-	curl_close($ch);
-
-	if ($response === false) {
-		return ['error' => $curlErr ?: 'Unknown cURL error', 'response' => $response];
-	}
-
-	if ($status !== 200) {
-		return ['error' => "Unexpected HTTP status $status", 'response' => $response];
-	}
-
-	$js = json_decode($response, true);
-
-	if ($js === null) {
-		return ['error' => 'Invalid JSON', 'response' => $response];
-	}
-
-	return $js ?? ['response' => $response];
-}
-
-class ApiContentTranslationPublish extends ApiBase
-{
+class ApiContentTranslationPublish extends ApiBase {
 
 	protected ParsoidClientFactory $parsoidClientFactory;
 	protected ?Translation $translation;
@@ -109,90 +61,44 @@ class ApiContentTranslationPublish extends ApiBase
 		TranslationStore $translationStore,
 		TranslationTargetUrlCreator $targetUrlCreator
 	) {
-		parent::__construct($main, $name);
+		parent::__construct( $main, $name );
 		$this->parsoidClientFactory = $parsoidClientFactory;
 		$this->languageFactory = $languageFactory;
 		$this->statsdDataFactory = $statsdDataFactory;
 		$this->languageNameUtils = $languageNameUtils;
 		$this->translationStore = $translationStore;
 		$this->targetUrlCreator = $targetUrlCreator;
-		$this->published_to = "local";
 	}
 
-	protected function getParsoidClient(): ParsoidClient
-	{
+	protected function getParsoidClient(): ParsoidClient {
 		return $this->parsoidClientFactory->createParsoidClient();
 	}
-	protected function publishToMdwiki($title, $wikitext, $params, $sourceRevisionId, $summary, $user_name)
-	{
-		$t_Params = [
-			'title' => $title->getPrefixedDBkey(),
-			'revid' => $sourceRevisionId,
-			'text' => $wikitext,
-			'user' => $user_name,
-			'summary' => $summary,
-			'target' => $params['to'],
-			'campaign' => $params['campaign'] ?? '',
-			'sourcetitle' => $params['sourcetitle'],
-		];
 
-		// wpCaptchaId, wpCaptchaWord
-		if (isset($params['wpCaptchaId'])) {
-			$t_Params['wpCaptchaId'] = $params['wpCaptchaId'];
-			$t_Params['wpCaptchaWord'] = $params['wpCaptchaWord'];
-		}
-
-		$wikipedia_result = post_to_target($t_Params);
-		return $wikipedia_result;
-	}
-	protected function saveWikitext($title, $wikitext, $params)
-	{
-		$categories = $this->getCategories($params);
-		if (count($categories)) {
-			$categoryText = "\n[[" . implode("]]\n[[", $categories) . ']]';
+	protected function saveWikitext( $title, $wikitext, $params ) {
+		$categories = $this->getCategories( $params );
+		if ( count( $categories ) ) {
+			$categoryText = "\n[[" . implode( "]]\n[[", $categories ) . ']]';
 			// If publishing to User namespace, wrap categories in <nowiki>
 			// to avoid blocks by abuse filter. See T88007.
-			if ($title->inNamespace(NS_USER)) {
+			if ( $title->inNamespace( NS_USER ) ) {
 				$categoryText = "\n<nowiki>$categoryText</nowiki>";
 			}
 			$wikitext .= $categoryText;
 		}
 
-		$wikitext = trim($wikitext);
-
-		$sourceRevisionId = $this->translation->translation['sourceRevisionId'];
-
-		$sourceLink = '[[:' . SiteMapper::getDomainCode($params['from'])
+		$sourceLink = '[[:' . Sitemapper::getDomainCode( $params['from'] )
 			. ':Special:Redirect/revision/'
-			. $sourceRevisionId
-			. '|' . $params['sourcetitle'] . ']] to:' . $params['to'] . " #mdwikicx";
+			. $this->translation->translation['sourceRevisionId']
+			. '|' . $params['sourcetitle'] . ']]';
 
 		$summary = $this->msg(
 			'cx-publish-summary',
 			$sourceLink
 		)->inContentLanguage()->text();
 
-		$user_name = $this->getUser()->getName();
-
-		if (isset($params['user']) && $params['user'] != '') {
-			$user_name = $params['user'];
-		}
-
-		$wikipedia_result = [];
-
-		if ($params['from'] === "mdwiki") { #$wikipedia_result
-
-			$wikipedia_result = $this->publishToMdwiki($title, $wikitext, $params, $sourceRevisionId, $summary, $user_name);
-			$this->published_to = "mdwiki";
-			// return $Result;
-
-			$wikitext = "<pre>$wikitext</pre>";
-			$wikitext .= "\n{{tr|" . $params['to'] . '|' . $params['sourcetitle'] . '|' . $user_name . '}}';
-		}
-
 		$apiParams = [
 			'action' => 'edit',
-			'title' => ($params['from'] === 'mdwiki') ? $params['to'] . "/" . $params['sourcetitle'] : $title->getPrefixedDBkey(),
+			'title' => $title->getPrefixedDBkey(),
 			'text' => $wikitext,
 			'summary' => $summary,
 		];
@@ -209,65 +115,58 @@ class ApiContentTranslationPublish extends ApiBase
 		);
 
 		$api->execute();
-		$result = $api->getResult()->getResultData();
-		// if ( $params['from'] === "mdwiki") return $wikipedia_result;
 
-		return [
-			'local_result' => $result,
-			'wikipedia_result' => $wikipedia_result,
-		];
+		return $api->getResult()->getResultData();
 	}
 
-	protected function getTags(array $params)
-	{
+	protected function getTags( array $params ) {
 		$tags = $params['publishtags'];
 		$tags[] = 'contenttranslation';
-		if ($params['cxversion'] === 2) {
+		if ( $params['cxversion'] === 2 ) {
 			$tags[] = 'contenttranslation-v2'; // Tag for CX2: contenttranslation-v2
 		}
 		// Remove any tags that are not registered.
-		return array_intersect($tags, ChangeTags::listSoftwareActivatedTags());
+		return array_intersect( $tags, ChangeTags::listSoftwareActivatedTags() );
 	}
 
-	protected function getCategories(array $params)
-	{
+	protected function getCategories( array $params ) {
 		$trackingCategoryMsg = 'cx-unreviewed-translation-category';
 		$categories = [];
 
-		if ($params['categories']) {
-			$categories = explode('|', $params['categories']);
+		if ( $params['categories'] ) {
+			$categories = explode( '|', $params['categories'] );
 		}
 
-		$trackingCategoryKey = array_search($trackingCategoryMsg, $categories);
-		if ($trackingCategoryKey !== false) {
-			$cat = $this->msg($trackingCategoryMsg)->inContentLanguage()->plain();
-			$containerCategory = Title::makeTitleSafe(NS_CATEGORY, $cat);
-			if ($cat !== '-' && $containerCategory) {
+		$trackingCategoryKey = array_search( $trackingCategoryMsg, $categories );
+		if ( $trackingCategoryKey !== false ) {
+			$cat = $this->msg( $trackingCategoryMsg )->inContentLanguage()->plain();
+			$containerCategory = Title::makeTitleSafe( NS_CATEGORY, $cat );
+			if ( $cat !== '-' && $containerCategory ) {
 				// Title without namespace prefix
 				$categories[$trackingCategoryKey] = $containerCategory->getText();
 				// Record using Graphite that the published translation is marked for review
-				$this->statsdDataFactory->increment('cx.publish.highmt.' . $params['to']);
+				$this->statsdDataFactory->increment( 'cx.publish.highmt.' . $params['to'] );
 			} else {
-				wfDebug(__METHOD__ . ": [[MediaWiki:$trackingCategoryMsg]] is not a valid title!\n");
-				unset($categories[$trackingCategoryKey]);
+				wfDebug( __METHOD__ . ": [[MediaWiki:$trackingCategoryMsg]] is not a valid title!\n" );
+				unset( $categories[$trackingCategoryKey] );
 			}
 		}
 
 		// Validate and normalize all categories.
-		foreach ($categories as $index => $category) {
-			$category = $this->removeApiCategoryNamespacePrefix($category, $params['to']);
+		foreach ( $categories as $index => $category ) {
+			$category = $this->removeApiCategoryNamespacePrefix( $category, $params['to'] );
 			// Also remove the namespace in English, if any. May be from T264490
-			$category = $this->removeApiCategoryNamespacePrefix($category, 'en');
-			$title = Title::makeTitleSafe(NS_CATEGORY, $category);
-			if ($title !== null) {
+			$category = $this->removeApiCategoryNamespacePrefix( $category, 'en' );
+			$title = Title::makeTitleSafe( NS_CATEGORY, $category );
+			if ( $title !== null ) {
 				$categories[$index] = $title->getPrefixedText();
 			} else {
-				unset($categories[$index]);
+				unset( $categories[$index] );
 			}
 		}
 
 		// Guard against duplicates, if any.
-		$categories = array_unique($categories);
+		$categories = array_unique( $categories );
 
 		return $categories;
 	}
@@ -279,51 +178,48 @@ class ApiContentTranslationPublish extends ApiBase
 	 * @param string $targetLanguage
 	 * @return string
 	 */
-	private function removeApiCategoryNamespacePrefix($category, $targetLanguage)
-	{
-		$targetLanguage = $this->languageFactory->getLanguage($targetLanguage);
-		$targetLanguageCategoryPrefix = $targetLanguage->getNsText(NS_CATEGORY) . ":";
-		if (substr($category, 0, strlen($targetLanguageCategoryPrefix)) === $targetLanguageCategoryPrefix) {
-			return substr($category, strlen($targetLanguageCategoryPrefix));
+	private function removeApiCategoryNamespacePrefix( $category, $targetLanguage ) {
+		$targetLanguage = $this->languageFactory->getLanguage( $targetLanguage );
+		$targetLanguageCategoryPrefix = $targetLanguage->getNsText( NS_CATEGORY ) . ":";
+		if ( substr( $category, 0, strlen( $targetLanguageCategoryPrefix ) ) === $targetLanguageCategoryPrefix ) {
+			return substr( $category, strlen( $targetLanguageCategoryPrefix ) );
 		}
 		return $category;
 	}
 
-	public function execute()
-	{
+	public function execute() {
 		$params = $this->extractRequestParams();
 
 		$block = $this->getUser()->getBlock();
-		if ($block && $block->isSitewide()) {
-			$this->dieBlocked($block);
+		if ( $block && $block->isSitewide() ) {
+			$this->dieBlocked( $block );
 		}
 
-		if (!$this->languageNameUtils->isKnownLanguageTag($params['from'])) {
-			$this->dieWithError('apierror-cx-invalidsourcelanguage', 'invalidsourcelanguage');
+		if ( !$this->languageNameUtils->isKnownLanguageTag( $params['from'] ) ) {
+			$this->dieWithError( 'apierror-cx-invalidsourcelanguage', 'invalidsourcelanguage' );
 		}
 
-		if (!$this->languageNameUtils->isKnownLanguageTag($params['to'])) {
-			$this->dieWithError('apierror-cx-invalidtargetlanguage', 'invalidtargetlanguage');
+		if ( !$this->languageNameUtils->isKnownLanguageTag( $params['to'] ) ) {
+			$this->dieWithError( 'apierror-cx-invalidtargetlanguage', 'invalidtargetlanguage' );
 		}
 
-		if (trim($params['html']) === '') {
-			$this->dieWithError(['apierror-paramempty', 'html'], 'invalidhtml');
+		if ( trim( $params['html'] ) === '' ) {
+			$this->dieWithError( [ 'apierror-paramempty', 'html' ], 'invalidhtml' );
 		}
 
 		$this->publish();
 	}
 
-	public function publish()
-	{
+	public function publish() {
 		$params = $this->extractRequestParams();
 		$user = $this->getUser();
 
-		$targetTitle = Title::newFromText($params['title']);
-		if (!$targetTitle) {
-			$this->dieWithError(['apierror-invalidtitle', wfEscapeWikiText($params['title'])]);
+		$targetTitle = Title::newFromText( $params['title'] );
+		if ( !$targetTitle ) {
+			$this->dieWithError( [ 'apierror-invalidtitle', wfEscapeWikiText( $params['title'] ) ] );
 		}
 
-		['sourcetitle' => $sourceTitle, 'from' => $sourceLanguage, 'to' => $targetLanguage] = $params;
+		[ 'sourcetitle' => $sourceTitle, 'from' => $sourceLanguage, 'to' => $targetLanguage ] = $params;
 		$this->translation = $this->translationStore->findTranslationByUser(
 			$user,
 			$sourceTitle,
@@ -331,13 +227,13 @@ class ApiContentTranslationPublish extends ApiBase
 			$targetLanguage
 		);
 
-		if ($this->translation === null) {
-			$this->dieWithError('apierror-cx-translationnotfound', 'translationnotfound');
+		if ( $this->translation === null ) {
+			$this->dieWithError( 'apierror-cx-translationnotfound', 'translationnotfound' );
 		}
 
-		$html = Deflate::inflate($params['html']);
-		if (!$html->isGood()) {
-			$this->dieWithError('deflate-invaliddeflate', 'invaliddeflate');
+		$html = Deflate::inflate( $params['html'] );
+		if ( !$html->isGood() ) {
+			$this->dieWithError( 'deflate-invaliddeflate', 'invaliddeflate' );
 		}
 		try {
 			$wikitext = $this->getParsoidClient()->convertHtmlToWikitext(
@@ -345,115 +241,86 @@ class ApiContentTranslationPublish extends ApiBase
 				$targetTitle,
 				$html->getValue()
 			)['body'];
-		} catch (Exception $e) {
+		} catch ( Exception $e ) {
 			$this->dieWithError(
-				['apierror-cx-docserverexception', wfEscapeWikiText($e->getMessage())],
-				'docserver'
+				[ 'apierror-cx-docserverexception', wfEscapeWikiText( $e->getMessage() ) ], 'docserver'
 			);
 		}
 
-		$saveresult_all = $this->saveWikitext($targetTitle, $wikitext, $params);
+		$saveresult = $this->saveWikitext( $targetTitle, $wikitext, $params );
+		$editStatus = $saveresult['edit']['result'];
 
-		$saveresult = $saveresult_all['local_result'] ?? [];
-
-		if ($params['from'] === "mdwiki") {
-			$saveresult = $saveresult_all['wikipedia_result'] ?? [];
-		};
-
-		$save_edit = $saveresult['edit'] ?? [];
-		$editStatus = $saveresult['edit']['result'] ?? [];
-
-		if ($editStatus === 'success' || $editStatus === 'Success') {
-			if (isset($save_edit['newrevid'])) {
-				$tags = $this->getTags($params);
+		if ( $editStatus === 'Success' ) {
+			if ( isset( $saveresult['edit']['newrevid'] ) ) {
+				$tags = $this->getTags( $params );
 				// Add the tags post-send, after RC row insertion
-				$revId = intval($save_edit['newrevid']);
-				DeferredUpdates::addCallableUpdate(static function () use ($revId, $tags) {
-					ChangeTags::addTags($tags, null, $revId, null);
-				});
+				$revId = intval( $saveresult['edit']['newrevid'] );
+				DeferredUpdates::addCallableUpdate( static function () use ( $revId, $tags ) {
+					ChangeTags::addTags( $tags, null, $revId, null );
+				} );
 			}
-			$title2 = $targetTitle->getPrefixedDBkey();
 
-			if ($params['from'] === "mdwiki") {
-				$title2 = $params['to'] . "/" . $params['sourcetitle'];
-			};
-
-			$targetURL = $this->targetUrlCreator->createTargetUrl($title2, $params['to']);
-			$targeturl_wiki = SiteMapper::getPageURL($params['to'], $targetTitle->getPrefixedDBkey());
+			$targetURL = $this->targetUrlCreator->createTargetUrl( $targetTitle->getPrefixedDBkey(), $params['to'] );
 			$result = [
 				'result' => 'success',
-				'targeturl' => $targetURL,
-				'targeturl_wiki' => $targeturl_wiki,
-				'published_to' => $this->published_to
+				'targeturl' => $targetURL
 			];
-
-			// if (is_array($saveresult) && isset($saveresult['LinkToWikidata'])) $result['LinkToWikidata'] = $saveresult['LinkToWikidata'];
 
 			$this->translation->translation['status'] = TranslationStore::TRANSLATION_STATUS_PUBLISHED;
 			$this->translation->translation['targetURL'] = $targetURL;
 
-			if (isset($save_edit['newrevid'])) {
-				$result['newrevid'] = intval($save_edit['newrevid']);
+			if ( isset( $saveresult['edit']['newrevid'] ) ) {
+				$result['newrevid'] = intval( $saveresult['edit']['newrevid'] );
 				$this->translation->translation['targetRevisionId'] = $result['newrevid'];
 			}
 
 			// Save the translation history.
-			$this->translationStore->saveTranslation($this->translation, $user);
+			$this->translationStore->saveTranslation( $this->translation, $user );
 
 			// Notify user about milestones
 			$this->notifyTranslator();
 		} else {
 			$result = [
 				'result' => 'error',
-				'edit' => $save_edit ?? []
+				'edit' => $saveresult['edit']
 			];
 		}
 
-		// $result['save_result_all'] = $saveresult_all;
-		$result['wikipedia_result'] = $saveresult_all['wikipedia_result'] ?? [];
-		$result['local_result'] = $saveresult_all['local_result'] ?? [];
-
-		// if warnings in $result['local_result'] del it
-		// unset($result['wikipedia_result']['warnings']);
-		// unset($result['local_result']['warnings']);
-
-		$this->getResult()->addValue(null, $this->getModuleName(), $result);
+		$this->getResult()->addValue( null, $this->getModuleName(), $result );
 	}
 
 	/**
 	 * Notify user about milestones.
 	 */
-	public function notifyTranslator()
-	{
+	public function notifyTranslator() {
 		$params = $this->extractRequestParams();
 
 		// Check if Echo is available. If not, skip.
-		if (!ExtensionRegistry::getInstance()->isLoaded('Echo')) {
+		if ( !ExtensionRegistry::getInstance()->isLoaded( 'Echo' ) ) {
 			return;
 		}
 
 		$user = $this->getUser();
-		$translator = new Translator($user);
+		$translator = new Translator( $user );
 		$translationCount = $translator->getTranslationsCount();
 
-		switch ($translationCount) {
+		switch ( $translationCount ) {
 			case 1:
-				Notification::firstTranslation($user);
+				Notification::firstTranslation( $user );
 				break;
 			case 2:
-				Notification::suggestionsAvailable($user, $params['sourcetitle']);
+				Notification::suggestionsAvailable( $user, $params['sourcetitle'] );
 				break;
 			case 10:
-				Notification::tenthTranslation($user);
+				Notification::tenthTranslation( $user );
 				break;
 			case 100:
-				Notification::hundredthTranslation($user);
+				Notification::hundredthTranslation( $user );
 				break;
 		}
 	}
 
-	public function getAllowedParams()
-	{
+	public function getAllowedParams() {
 		return [
 			'title' => [
 				ParamValidator::PARAM_REQUIRED => true,
@@ -475,7 +342,6 @@ class ApiContentTranslationPublish extends ApiBase
 				ParamValidator::PARAM_ISMULTI => true,
 			],
 			/** @todo These should be renamed to something all-lowercase and lacking a "wp" prefix */
-			'campaign' => null,
 			'wpCaptchaId' => null,
 			'wpCaptchaWord' => null,
 			'cxversion' => [
@@ -488,18 +354,15 @@ class ApiContentTranslationPublish extends ApiBase
 		];
 	}
 
-	public function needsToken()
-	{
+	public function needsToken() {
 		return 'csrf';
 	}
 
-	public function isWriteMode()
-	{
+	public function isWriteMode() {
 		return true;
 	}
 
-	public function isInternal()
-	{
+	public function isInternal() {
 		return true;
 	}
 }

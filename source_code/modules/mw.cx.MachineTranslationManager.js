@@ -21,9 +21,6 @@ mw.cx.MachineTranslationManager = function MwCxMachineTranslationManager(
 	sourceLanguage, targetLanguage, MTService
 ) {
 	this.sourceLanguage = sourceLanguage;
-
-	// if (sourceLanguage === 'mdwiki') { this.sourceLanguage = 'en'; }
-	// TODO: mdwiki work
 	this.targetLanguage = targetLanguage;
 	this.MT = MTService;
 };
