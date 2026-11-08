@@ -750,7 +750,7 @@ mw.cx.TargetArticle.prototype.addMdwikiLinks = function (targetLanguage, targetT
 		wdlink = ` - <a href='${wdurl}' target='_blank'>Link to Wikidata</a>`
 	}
 	// var html = `<div style="float:left;">${link}${wdlink}</div>`;
-	var html = `<br>x${link}${wdlink}`;
+	var html = `<br>${link}${wdlink}`;
 
 	// $('.cx-message-widget-details').append(html);
 	$('.cx-message-widget-message').append(html);
