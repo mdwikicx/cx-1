@@ -20,7 +20,7 @@
  * @param {string} targetLanguage Language code
  * @param {mw.cx.SiteMapper} siteMapper
  */
-mw.cx.MwApiRequestManager = function MwCxMwApiRequestManager( sourceLanguage, targetLanguage, siteMapper ) {
+mw.cx.MwApiRequestManager = function MwCxMwApiRequestManager(sourceLanguage, targetLanguage, siteMapper) {
 	this.sourceLanguage = sourceLanguage;
 	this.targetLanguage = targetLanguage;
 	this.siteMapper = siteMapper;
@@ -34,32 +34,32 @@ mw.cx.MwApiRequestManager = function MwCxMwApiRequestManager( sourceLanguage, ta
  * Initialize or reset all caches.
  */
 mw.cx.MwApiRequestManager.prototype.init = function () {
-	this.titlePairCache[ this.sourceLanguage ] = new mw.cx.TitlePairCache( {
+	this.titlePairCache[this.sourceLanguage] = new mw.cx.TitlePairCache({
 		sourceLanguage: this.sourceLanguage,
 		targetLanguage: this.targetLanguage,
 		siteMapper: this.siteMapper
-	} );
-	this.titlePairCache[ this.targetLanguage ] = new mw.cx.TitlePairCache( {
+	});
+	this.titlePairCache[this.targetLanguage] = new mw.cx.TitlePairCache({
 		sourceLanguage: this.targetLanguage,
 		targetLanguage: this.sourceLanguage,
 		siteMapper: this.siteMapper
-	} );
-	this.categoryCache[ this.sourceLanguage ] = new mw.cx.CategoryCache( {
+	});
+	this.categoryCache[this.sourceLanguage] = new mw.cx.CategoryCache({
 		language: this.sourceLanguage,
 		siteMapper: this.siteMapper
-	} );
-	this.categoryCache[ this.targetLanguage ] = new mw.cx.CategoryCache( {
+	});
+	this.categoryCache[this.targetLanguage] = new mw.cx.CategoryCache({
 		language: this.targetLanguage,
 		siteMapper: this.siteMapper
-	} );
-	this.namespaceCache[ this.sourceLanguage ] = new mw.cx.NamespaceCache( {
+	});
+	this.namespaceCache[this.sourceLanguage] = new mw.cx.NamespaceCache({
 		language: this.targetLanguage,
 		siteMapper: this.siteMapper
-	} );
-	this.namespaceCache[ this.targetLanguage ] = new mw.cx.NamespaceCache( {
+	});
+	this.namespaceCache[this.targetLanguage] = new mw.cx.NamespaceCache({
 		language: this.targetLanguage,
 		siteMapper: this.siteMapper
-	} );
+	});
 };
 
 /**
@@ -71,11 +71,11 @@ mw.cx.MwApiRequestManager.prototype.init = function () {
  * @param {string} title Title
  * @return {jQuery.Promise} Promise that will be resolved with the data once it's available
  */
-mw.cx.MwApiRequestManager.prototype.getTitlePair = function ( language, title ) {
-	if ( !this.titlePairCache[ language ] ) {
-		throw new Error( '[CX] TitlePairCache not initialized for ' + language );
+mw.cx.MwApiRequestManager.prototype.getTitlePair = function (language, title) {
+	if (!this.titlePairCache[language]) {
+		throw new Error('[CX] TitlePairCache not initialized for ' + language);
 	}
-	return this.titlePairCache[ language ].get( title );
+	return this.titlePairCache[language].get(title);
 };
 
 /**
@@ -83,11 +83,11 @@ mw.cx.MwApiRequestManager.prototype.getTitlePair = function ( language, title ) 
  * @param {string} title Title
  * @return {jQuery.Promise} Promise that will be resolved with the data once it's available
  */
-mw.cx.MwApiRequestManager.prototype.getCategories = function ( language, title ) {
-	if ( !this.categoryCache[ language ] ) {
-		throw new Error( '[CX] CategoryCache not initialized for ' + language );
+mw.cx.MwApiRequestManager.prototype.getCategories = function (language, title) {
+	if (!this.categoryCache[language]) {
+		throw new Error('[CX] CategoryCache not initialized for ' + language);
 	}
-	return this.categoryCache[ language ].get( title );
+	return this.categoryCache[language].get(title);
 };
 
 /**
@@ -95,9 +95,9 @@ mw.cx.MwApiRequestManager.prototype.getCategories = function ( language, title )
  * @param {string} canonicalNamespace Canonical namespace
  * @return {jQuery.Promise} Promise that will be resolved with the data once it's available
  */
-mw.cx.MwApiRequestManager.prototype.getNamespaceAlias = function ( language, canonicalNamespace ) {
-	if ( !this.namespaceCache[ language ] ) {
-		throw new Error( '[CX] namespaceCache not initialized for ' + language );
+mw.cx.MwApiRequestManager.prototype.getNamespaceAlias = function (language, canonicalNamespace) {
+	if (!this.namespaceCache[language]) {
+		throw new Error('[CX] namespaceCache not initialized for ' + language);
 	}
-	return this.namespaceCache[ language ].get( canonicalNamespace );
+	return this.namespaceCache[language].get(canonicalNamespace);
 };

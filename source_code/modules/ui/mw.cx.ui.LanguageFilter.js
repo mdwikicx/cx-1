@@ -2,11 +2,11 @@
 
 // Register 'All languages' in ULS data
 // 'all' could be valid language code, so we use extension mechanism and go with 'x-all'
-$.uls.data.addLanguage( 'x-all', {
+$.uls.data.addLanguage('x-all', {
 	script: 'Latn',
-	regions: [ 'WW' ],
-	autonym: mw.msg( 'cx-translation-filter-uls-all-languages' )
-} );
+	regions: ['WW'],
+	autonym: mw.msg('cx-translation-filter-uls-all-languages')
+});
 
 /**
  * Language filter
@@ -21,12 +21,12 @@ $.uls.data.addLanguage( 'x-all', {
  * @param {Function} [config.onSourceLanguageChange] Callback invoked when source language changes
  * @param {Function} [config.onTargetLanguageChange] Callback invoked when target language changes
  */
-mw.cx.ui.LanguageFilter = function ( config ) {
+mw.cx.ui.LanguageFilter = function (config) {
 	// Configuration initialization
 	this.config = config || {};
 
 	// Parent method
-	mw.cx.ui.LanguageFilter.super.call( this, config );
+	mw.cx.ui.LanguageFilter.super.call(this, config);
 
 	this.canBeSame = this.config.canBeSame || false;
 	this.canBeUndefined = this.config.canBeUndefined || false;
@@ -48,7 +48,7 @@ mw.cx.ui.LanguageFilter = function ( config ) {
 	this.init();
 };
 
-OO.inheritClass( mw.cx.ui.LanguageFilter, OO.ui.Widget );
+OO.inheritClass(mw.cx.ui.LanguageFilter, OO.ui.Widget);
 
 /* Static Properties */
 
@@ -61,12 +61,12 @@ mw.cx.ui.LanguageFilter.static.targetLanguages = null;
 /* Methods */
 
 mw.cx.ui.LanguageFilter.prototype.init = function () {
-	const sourceLanguage = mw.storage.get( 'cxSourceLanguage' ),
-		targetLanguage = mw.storage.get( 'cxTargetLanguage' );
+	const sourceLanguage = mw.storage.get('cxSourceLanguage'),
+		targetLanguage = mw.storage.get('cxTargetLanguage');
 
 	this.isNarrowScreenSize = document.documentElement.clientWidth < this.narrowLimit;
 
-	if ( !this.canBeUndefined ) {
+	if (!this.canBeUndefined) {
 		this.sourceLanguage = sourceLanguage;
 		this.targetLanguage = targetLanguage;
 	}
@@ -76,8 +76,8 @@ mw.cx.ui.LanguageFilter.prototype.init = function () {
 	this.targetLanguages = this.constructor.static.targetLanguages;
 
 	this.render();
-	this.setFilterLabel( this.sourceLanguageButton, this.sourceLanguage );
-	this.setFilterLabel( this.targetLanguageButton, this.targetLanguage );
+	this.setFilterLabel(this.sourceLanguageButton, this.sourceLanguage);
+	this.setFilterLabel(this.targetLanguageButton, this.targetLanguage);
 	this.listen();
 };
 
@@ -87,12 +87,12 @@ mw.cx.ui.LanguageFilter.prototype.init = function () {
  * @param {Array} languages An array of language codes.
  * @return {Object} autonyms indexed by language code.
  */
-mw.cx.ui.LanguageFilter.prototype.getAutonyms = function ( languages ) {
-	return languages.reduce( function ( prevObject, element ) {
-		prevObject[ element ] = $.uls.data.getAutonym( element );
+mw.cx.ui.LanguageFilter.prototype.getAutonyms = function (languages) {
+	return languages.reduce(function (prevObject, element) {
+		prevObject[element] = $.uls.data.getAutonym(element);
 
 		return prevObject;
-	}, {} );
+	}, {});
 };
 
 /**
@@ -103,13 +103,13 @@ mw.cx.ui.LanguageFilter.prototype.calculateUlsPosition = function () {
 	const ulsTriggerLeft = this.$element.offset().left,
 		triggerWidth = this.$element.outerWidth(),
 		menuWidth = this.$menu.width(),
-		isRtl = $( 'html' ).prop( 'dir' ) === 'rtl',
-		left = isRtl ? ulsTriggerLeft : ( ulsTriggerLeft + triggerWidth - menuWidth ),
-		isInsideViewport = isRtl ? ( left + menuWidth ) < document.documentElement.clientWidth : left > 0;
+		isRtl = $('html').prop('dir') === 'rtl',
+		left = isRtl ? ulsTriggerLeft : (ulsTriggerLeft + triggerWidth - menuWidth),
+		isInsideViewport = isRtl ? (left + menuWidth) < document.documentElement.clientWidth : left > 0;
 
-	if ( isInsideViewport ) {
+	if (isInsideViewport) {
 		this.left = left;
-		this.$menu.css( this.position() );
+		this.$menu.css(this.position());
 		return;
 	}
 
@@ -119,8 +119,8 @@ mw.cx.ui.LanguageFilter.prototype.calculateUlsPosition = function () {
 	// * uls-medium
 	// * uls-narrow
 	this.$menu
-		.removeClass( 'uls-wide uls-medium uls-narrow' )
-		.addClass( 'uls-' + this.menuWidth );
+		.removeClass('uls-wide uls-medium uls-narrow')
+		.addClass('uls-' + this.menuWidth);
 
 	// HACK: This is a recursive call to this function, because this
 	// method is registered as onVisible when ULS menu is created.
@@ -134,8 +134,8 @@ mw.cx.ui.LanguageFilter.prototype.calculateUlsPosition = function () {
  * @param {string} targetLanguage A language code.
  * @return {boolean} true if the target language is valid for the source language.
  */
-mw.cx.ui.LanguageFilter.prototype.isValidTarget = function ( targetLanguage ) {
-	return this.targetLanguages.indexOf( targetLanguage ) !== -1;
+mw.cx.ui.LanguageFilter.prototype.isValidTarget = function (targetLanguage) {
+	return this.targetLanguages.indexOf(targetLanguage) !== -1;
 };
 
 /**
@@ -145,11 +145,11 @@ mw.cx.ui.LanguageFilter.prototype.isValidTarget = function ( targetLanguage ) {
  * @param {string} sourceLanguage A language code.
  * @return {boolean} true if the target language is valid for the source language.
  */
-mw.cx.ui.LanguageFilter.prototype.isValidSource = function ( sourceLanguage ) {
-	return this.sourceLanguages.indexOf( sourceLanguage ) !== -1;
+mw.cx.ui.LanguageFilter.prototype.isValidSource = function (sourceLanguage) {
+	return this.sourceLanguages.indexOf(sourceLanguage) !== -1;
 };
 
-mw.cx.ui.LanguageFilter.prototype.setValidSourceLanguages = function ( sourceLanguages ) {
+mw.cx.ui.LanguageFilter.prototype.setValidSourceLanguages = function (sourceLanguages) {
 	this.sourceLanguages = sourceLanguages;
 };
 
@@ -167,32 +167,32 @@ mw.cx.ui.LanguageFilter.prototype.getSourceLanguage = function () {
  *
  * @param {string} language A language code
  */
-mw.cx.ui.LanguageFilter.prototype.setSourceLanguage = function ( language ) {
-	if ( language === 'x-all' ) {
+mw.cx.ui.LanguageFilter.prototype.setSourceLanguage = function (language) {
+	if (language === 'x-all') {
 		language = null;
 	}
 
 	// Do not allow selection of invalid source languages, unless specified with canBeUndefined tag
-	if ( ( !this.canBeUndefined && !this.isValidSource( language ) ) || language === this.getSourceLanguage() ) {
+	if ((!this.canBeUndefined && !this.isValidSource(language)) || language === this.getSourceLanguage()) {
 		return;
 	}
 
 	// Don't let the same languages be selected as source and target.
 	// Instead, do what the user probably means: either swap them if
 	// it's valid, or pick the first of the common languages in ULS.
-	if ( !this.canBeSame && language === this.getTargetLanguage() ) {
+	if (!this.canBeSame && language === this.getTargetLanguage()) {
 		const currentSource = this.getSourceLanguage();
 
-		if ( this.isValidTarget( currentSource ) ) {
+		if (this.isValidTarget(currentSource)) {
 			this.sourceLanguage = language;
-			this.setTargetLanguage( currentSource );
+			this.setTargetLanguage(currentSource);
 		} else {
-			const quickListLanguages = this.targetLanguageButton.$button.data( 'uls' ).options.quickList();
-			for ( let i = 0, length = quickListLanguages.length; i < length; i++ ) {
-				const quickListLang = quickListLanguages[ i ];
+			const quickListLanguages = this.targetLanguageButton.$button.data('uls').options.quickList();
+			for (let i = 0, length = quickListLanguages.length; i < length; i++) {
+				const quickListLang = quickListLanguages[i];
 
-				if ( this.isValidTarget( quickListLang ) && quickListLang !== language ) {
-					this.setTargetLanguage( quickListLang );
+				if (this.isValidTarget(quickListLang) && quickListLang !== language) {
+					this.setTargetLanguage(quickListLang);
 					break;
 				}
 			}
@@ -201,19 +201,19 @@ mw.cx.ui.LanguageFilter.prototype.setSourceLanguage = function ( language ) {
 
 	// If we still don't have a valid source language, return,
 	// so we prevent same source and target language
-	if ( !this.canBeSame && language === this.getTargetLanguage() ) {
+	if (!this.canBeSame && language === this.getTargetLanguage()) {
 		return;
 	}
 
 	this.sourceLanguage = language;
-	this.setFilterLabel( this.sourceLanguageButton, this.sourceLanguage );
+	this.setFilterLabel(this.sourceLanguageButton, this.sourceLanguage);
 
-	if ( this.updateLocalStorage ) {
-		mw.storage.set( 'cxSourceLanguage', this.sourceLanguage );
+	if (this.updateLocalStorage) {
+		mw.storage.set('cxSourceLanguage', this.sourceLanguage);
 	}
 
-	if ( this.onSourceLanguageChange ) {
-		this.onSourceLanguageChange( this.sourceLanguage );
+	if (this.onSourceLanguageChange) {
+		this.onSourceLanguageChange(this.sourceLanguage);
 	}
 };
 
@@ -223,9 +223,9 @@ mw.cx.ui.LanguageFilter.prototype.setSourceLanguage = function ( language ) {
  *
  * @param {string} language Language code
  */
-mw.cx.ui.LanguageFilter.prototype.setSourceLanguageNoChecks = function ( language ) {
+mw.cx.ui.LanguageFilter.prototype.setSourceLanguageNoChecks = function (language) {
 	this.sourceLanguage = language;
-	this.setFilterLabel( this.sourceLanguageButton, this.sourceLanguage );
+	this.setFilterLabel(this.sourceLanguageButton, this.sourceLanguage);
 };
 
 /**
@@ -242,39 +242,39 @@ mw.cx.ui.LanguageFilter.prototype.getTargetLanguage = function () {
  *
  * @param {string} language A language code
  */
-mw.cx.ui.LanguageFilter.prototype.setTargetLanguage = function ( language ) {
-	if ( language === 'x-all' ) {
+mw.cx.ui.LanguageFilter.prototype.setTargetLanguage = function (language) {
+	if (language === 'x-all') {
 		language = null;
 	}
 
-	if ( ( !this.canBeUndefined && !this.isValidTarget( language ) ) || this.targetLanguage === language ) {
+	if ((!this.canBeUndefined && !this.isValidTarget(language)) || this.targetLanguage === language) {
 		return;
 	}
 
 	// Don't let the same languages be selected as source and target.
 	// Instead, do what the user probably means: either swap them if
 	// it's valid, or pick the first valid language of the common languages in ULS.
-	if ( !this.canBeSame && language === this.getSourceLanguage() ) {
+	if (!this.canBeSame && language === this.getSourceLanguage()) {
 		const currentTarget = this.getTargetLanguage();
 
-		if ( this.isValidSource( currentTarget ) ) {
+		if (this.isValidSource(currentTarget)) {
 			this.targetLanguage = language;
-			this.setSourceLanguage( currentTarget );
+			this.setSourceLanguage(currentTarget);
 		} else {
 			// When swapping languages, there can sometimes be only one available source language,
 			// and we don't have options to swap languages.
 			// This can rarely happen, but we return early to prevent
 			// any errors and unexpected behavior in code that uses this class.
-			if ( this.sourceLanguages.length === 1 ) {
+			if (this.sourceLanguages.length === 1) {
 				return;
 			}
 
-			const quickListLanguages = this.sourceLanguageButton.$button.data( 'uls' ).options.quickList();
-			for ( let i = 0, length = quickListLanguages.length; i < length; i++ ) {
-				const quickListLang = quickListLanguages[ i ];
+			const quickListLanguages = this.sourceLanguageButton.$button.data('uls').options.quickList();
+			for (let i = 0, length = quickListLanguages.length; i < length; i++) {
+				const quickListLang = quickListLanguages[i];
 
-				if ( this.isValidSource( quickListLang ) && quickListLang !== language ) {
-					this.setSourceLanguage( quickListLang );
+				if (this.isValidSource(quickListLang) && quickListLang !== language) {
+					this.setSourceLanguage(quickListLang);
 					break;
 				}
 			}
@@ -283,19 +283,19 @@ mw.cx.ui.LanguageFilter.prototype.setTargetLanguage = function ( language ) {
 
 	// If we still don't have a valid source language, return,
 	// so we prevent same source and target language
-	if ( !this.canBeSame && language === this.getSourceLanguage() ) {
+	if (!this.canBeSame && language === this.getSourceLanguage()) {
 		return;
 	}
 
 	this.targetLanguage = language;
-	this.setFilterLabel( this.targetLanguageButton, this.targetLanguage );
+	this.setFilterLabel(this.targetLanguageButton, this.targetLanguage);
 
-	if ( this.updateLocalStorage ) {
-		mw.storage.set( 'cxTargetLanguage', this.targetLanguage );
+	if (this.updateLocalStorage) {
+		mw.storage.set('cxTargetLanguage', this.targetLanguage);
 	}
 
-	if ( this.onTargetLanguageChange ) {
-		this.onTargetLanguageChange( this.targetLanguage );
+	if (this.onTargetLanguageChange) {
+		this.onTargetLanguageChange(this.targetLanguage);
 	}
 };
 
@@ -305,9 +305,9 @@ mw.cx.ui.LanguageFilter.prototype.setTargetLanguage = function ( language ) {
  *
  * @param {string} language Language code
  */
-mw.cx.ui.LanguageFilter.prototype.setTargetLanguageNoChecks = function ( language ) {
+mw.cx.ui.LanguageFilter.prototype.setTargetLanguageNoChecks = function (language) {
 	this.targetLanguage = language;
-	this.setFilterLabel( this.targetLanguageButton, this.targetLanguage );
+	this.setFilterLabel(this.targetLanguageButton, this.targetLanguage);
 };
 
 /**
@@ -316,24 +316,24 @@ mw.cx.ui.LanguageFilter.prototype.setTargetLanguageNoChecks = function ( languag
  * @param {OO.ui.ButtonWidget} filterButton
  * @param {string} language
  */
-mw.cx.ui.LanguageFilter.prototype.setFilterLabel = function ( filterButton, language ) {
-	if ( this.canBeUndefined && !language ) {
-		filterButton.setLabel( mw.msg( 'cx-translation-filter-label-all-languages' ) );
+mw.cx.ui.LanguageFilter.prototype.setFilterLabel = function (filterButton, language) {
+	if (this.canBeUndefined && !language) {
+		filterButton.setLabel(mw.msg('cx-translation-filter-label-all-languages'));
 		return;
 	}
 
 	const langProps = {
 		lang: language,
-		dir: $.uls.data.getDir( language )
+		dir: $.uls.data.getDir(language)
 	};
 	const label = this.isNarrowScreenSize ?
-		mw.language.bcp47( language ) :
-		$.uls.data.getAutonym( language );
+		mw.language.bcp47(language) :
+		$.uls.data.getAutonym(language);
 
-	filterButton.$button.prop( langProps );
-	filterButton.setLabel( label );
+	filterButton.$button.prop(langProps);
+	filterButton.setLabel(label);
 
-	this.emit( 'resize' );
+	this.emit('resize');
 };
 
 /**
@@ -343,37 +343,37 @@ mw.cx.ui.LanguageFilter.prototype.setFilterLabel = function ( filterButton, lang
  * @param {boolean} [replace=false] Whether to destroy the ULS instance before recreating it
  * @param {Object} [ulsOptions] ULS options that are added to the ULS
  */
-mw.cx.ui.LanguageFilter.prototype.fillSourceLanguages = function ( sourceLanguages, replace, ulsOptions ) {
+mw.cx.ui.LanguageFilter.prototype.fillSourceLanguages = function (sourceLanguages, replace, ulsOptions) {
 	const self = this;
 
 	// Default to all valid source languages
-	if ( !sourceLanguages ) {
+	if (!sourceLanguages) {
 		sourceLanguages = this.constructor.static.sourceLanguages;
 	}
 
-	if ( replace ) {
+	if (replace) {
 		// Delete the old source ULS data
-		this.sourceLanguageButton.$button.data( 'uls', null );
-		this.sourceLanguageButton.$button.off( 'click' );
+		this.sourceLanguageButton.$button.data('uls', null);
+		this.sourceLanguageButton.$button.off('click');
 	}
 
-	this.sourceLanguageButton.$button.uls( $.extend( {
-		languages: this.getAutonyms( sourceLanguages ),
+	this.sourceLanguageButton.$button.uls($.extend({
+		languages: this.getAutonyms(sourceLanguages),
 		ulsPurpose: 'cx-languagefilter-source',
-		onSelect: function ( language ) {
-			self.setSourceLanguage( language );
-			mw.uls.addPreviousLanguage( language );
+		onSelect: function (language) {
+			self.setSourceLanguage(language);
+			mw.uls.addPreviousLanguage(language);
 		},
 		onReady: function () {
-			this.$menu.addClass( 'cx-language-filter-source-language' );
+			this.$menu.addClass('cx-language-filter-source-language');
 		},
 		onVisible: this.calculateUlsPosition,
 		quickList: function () {
-			return mw.uls.getFrequentLanguageList().filter( function ( n ) {
-				return sourceLanguages.indexOf( n ) !== -1;
-			} );
+			return mw.uls.getFrequentLanguageList().filter(function (n) {
+				return sourceLanguages.indexOf(n) !== -1;
+			});
 		}
-	}, ulsOptions ) );
+	}, ulsOptions));
 };
 
 /**
@@ -384,90 +384,90 @@ mw.cx.ui.LanguageFilter.prototype.fillSourceLanguages = function ( sourceLanguag
  * @param {boolean} [replace=false] Whether to destroy the ULS instance before recreating it
  * @param {Object} [ulsOptions] ULS options that are added to the ULS
  */
-mw.cx.ui.LanguageFilter.prototype.fillTargetLanguages = function ( targetLanguages, replace, ulsOptions ) {
+mw.cx.ui.LanguageFilter.prototype.fillTargetLanguages = function (targetLanguages, replace, ulsOptions) {
 	const self = this;
 
 	// Default to all valid target languages
-	if ( !targetLanguages ) {
+	if (!targetLanguages) {
 		targetLanguages = this.constructor.static.targetLanguages;
 	}
 
-	if ( replace ) {
+	if (replace) {
 		// Delete the old target ULS data
-		this.targetLanguageButton.$button.data( 'uls', null );
-		this.targetLanguageButton.$button.off( 'click' );
+		this.targetLanguageButton.$button.data('uls', null);
+		this.targetLanguageButton.$button.off('click');
 	}
 
-	this.targetLanguageButton.$button.uls( $.extend( {
-		languages: this.getAutonyms( targetLanguages ),
+	this.targetLanguageButton.$button.uls($.extend({
+		languages: this.getAutonyms(targetLanguages),
 		ulsPurpose: 'cx-languagefilter-target',
-		onSelect: function ( language ) {
-			self.setTargetLanguage( language );
-			mw.uls.addPreviousLanguage( language );
+		onSelect: function (language) {
+			self.setTargetLanguage(language);
+			mw.uls.addPreviousLanguage(language);
 		},
 		onReady: function () {
-			this.$menu.addClass( 'cx-language-filter-target-language' );
+			this.$menu.addClass('cx-language-filter-target-language');
 		},
 		onVisible: this.calculateUlsPosition,
 		quickList: function () {
-			return mw.uls.getFrequentLanguageList().filter( function ( n ) {
-				return targetLanguages.indexOf( n ) !== -1;
-			} );
+			return mw.uls.getFrequentLanguageList().filter(function (n) {
+				return targetLanguages.indexOf(n) !== -1;
+			});
 		},
 		languageDecorator: this.config.languageDecorator
-	}, ulsOptions ) );
+	}, ulsOptions));
 };
 
 mw.cx.ui.LanguageFilter.prototype.render = function () {
-	this.sourceLanguageButton = new OO.ui.ButtonWidget( {
+	this.sourceLanguageButton = new OO.ui.ButtonWidget({
 		framed: false,
-		classes: [ 'cx-language-filter-source-language' ],
-		$button: $( '<a>' ).addClass( 'cx-language-filter-button' )
-	} );
+		classes: ['cx-language-filter-source-language'],
+		$button: $('<a>').addClass('cx-language-filter-button')
+	});
 
-	this.targetLanguageButton = new OO.ui.ButtonWidget( {
+	this.targetLanguageButton = new OO.ui.ButtonWidget({
 		framed: false,
-		classes: [ 'cx-language-filter-target-language' ],
-		$button: $( '<a>' ).addClass( 'cx-language-filter-button' )
-	} );
+		classes: ['cx-language-filter-target-language'],
+		$button: $('<a>').addClass('cx-language-filter-button')
+	});
 
-	this.fillSourceLanguages( this.sourceLanguages );
-	this.fillTargetLanguages( this.targetLanguages );
+	this.fillSourceLanguages(this.sourceLanguages);
+	this.fillTargetLanguages(this.targetLanguages);
 
 	this.$element
-		.addClass( 'cx-language-filter' )
+		.addClass('cx-language-filter')
 		.append(
 			this.sourceLanguageButton.$element,
-			$( '<div>' ).addClass( 'cx-language-filter-arrow' ),
+			$('<div>').addClass('cx-language-filter-arrow'),
 			this.targetLanguageButton.$element
 		);
 };
 
 mw.cx.ui.LanguageFilter.prototype.listen = function () {
-	this.sourceLanguageButton.$button.on( {
+	this.sourceLanguageButton.$button.on({
 		keypress: function () {
 			this.click();
 		}
-	} );
-	this.targetLanguageButton.$button.on( {
+	});
+	this.targetLanguageButton.$button.on({
 		keypress: function () {
 			this.click();
 		}
-	} );
+	});
 
 	// Resize handler
-	$( window ).on( 'resize', OO.ui.throttle( this.resize.bind( this ), 250 ) );
+	$(window).on('resize', OO.ui.throttle(this.resize.bind(this), 250));
 };
 
 mw.cx.ui.LanguageFilter.prototype.resize = function () {
 	const isNarrowScreenSize = document.documentElement.clientWidth < this.narrowLimit;
 
 	// Exit early if screen size stays above/under narrow screen size limit
-	if ( this.isNarrowScreenSize === isNarrowScreenSize ) {
+	if (this.isNarrowScreenSize === isNarrowScreenSize) {
 		return;
 	}
 
 	this.isNarrowScreenSize = isNarrowScreenSize;
-	this.setFilterLabel( this.sourceLanguageButton, this.sourceLanguage );
-	this.setFilterLabel( this.targetLanguageButton, this.targetLanguage );
+	this.setFilterLabel(this.sourceLanguageButton, this.sourceLanguage);
+	this.setFilterLabel(this.targetLanguageButton, this.targetLanguage);
 };
