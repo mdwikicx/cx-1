@@ -10,43 +10,44 @@
  * @param {mw.cx.dm.PageTitleModel} model
  * @param {Object} [config] Configuration object
  */
-mw.cx.ui.PageTitleWidget = function ( model, config ) {
+mw.cx.ui.PageTitleWidget = function (model, config) {
 	// Configuration initialization
-	config = $.extend( config, {
-		classes: [ 'cx-pagetitle' ],
+	config = $.extend(config, {
+		classes: ['cx-pagetitle'],
 		type: 'text',
 		autosize: true
-	} );
+	});
 
+	this.language = config.language;
 	this.model = model;
 
 	// Parent constructor
-	mw.cx.ui.PageTitleWidget.super.call( this, config );
+	mw.cx.ui.PageTitleWidget.super.call(this, config);
 
 	// Mixin constructor
-	ve.ce.CXLintableNode.call( this );
+	ve.ce.CXLintableNode.call(this);
 
 	this.validTitle = null;
 
 	// Events
-	$( this.getElementWindow() ).on(
+	$(this.getElementWindow()).on(
 		'resize',
-		OO.ui.throttle( this.onWindowResize.bind( this ), 300 )
+		OO.ui.throttle(this.onWindowResize.bind(this), 300)
 	);
 
-	this.getFocusableElement().off( 'focus' ).on( 'focus', this.emit.bind( this, 'focus' ) );
-	$( document )
-		.off( 'blur', '.cx-pagetitle' )
-		.on( 'blur', '.cx-pagetitle', this.emit.bind( this, 'blur' ) );
-	this.connect( this, {
-		change: OO.ui.debounce( this.validateTitle.bind( this ), 300 )
-	} );
+	this.getFocusableElement().off('focus').on('focus', this.emit.bind(this, 'focus'));
+	$(document)
+		.off('blur', '.cx-pagetitle')
+		.on('blur', '.cx-pagetitle', this.emit.bind(this, 'blur'));
+	this.connect(this, {
+		change: OO.ui.debounce(this.validateTitle.bind(this), 300)
+	});
 };
 
 /* Setup */
 
-OO.inheritClass( mw.cx.ui.PageTitleWidget, OO.ui.MultilineTextInputWidget );
-OO.mixinClass( mw.cx.ui.PageTitleWidget, ve.ce.CXLintableNode );
+OO.inheritClass(mw.cx.ui.PageTitleWidget, OO.ui.MultilineTextInputWidget);
+OO.mixinClass(mw.cx.ui.PageTitleWidget, ve.ce.CXLintableNode);
 
 /* Methods */
 
@@ -71,33 +72,37 @@ mw.cx.ui.PageTitleWidget.prototype.blursEditingSurface = function () {
 	return true;
 };
 
-mw.cx.ui.PageTitleWidget.prototype.validateTitle = function ( value ) {
+mw.cx.ui.PageTitleWidget.prototype.validateTitle = function (value) {
 	// Empty array in param resolves all issues with the title
-	this.model.resolveTranslationIssues( [] );
+	this.model.resolveTranslationIssues([]);
 
-	if ( !mw.Title.newFromText( value ) ) {
-		this.model.addTranslationIssues( [ value === '' ? this.getEmptyTitleError() : this.getInvalidCharacterError() ] );
+	if (!mw.Title.newFromText(value)) {
+		this.model.addTranslationIssues([value === '' ? this.getEmptyTitleError() : this.getInvalidCharacterError()]);
 		return;
 	}
 
-	ve.init.platform.linkCache.get( this.getValue() ).then( function ( result ) {
-		if ( result.missing ) {
+	ve.init.platform.linkCache.get(this.getValue()).then(function (result) {
+		if (result.missing) {
 			return;
 		}
 
-		this.model.addTranslationIssues( [ this.getExistingTitleWarning() ] );
-	}.bind( this ) );
+		this.model.addTranslationIssues([this.getExistingTitleWarning()]);
+	}.bind(this));
 };
 
 mw.cx.ui.PageTitleWidget.prototype.getExistingTitleWarning = function () {
+	// By: Ibrahem Qasim
+	var href = mw.util.getUrl(this.getValue());
+	var wikipediaUrl = "//" + this.language + ".wikipedia.org/wiki/" + encodeURIComponent(this.getValue());
 	return {
 		name: 'existing-title',
 		message: mw.message(
 			'cx-tools-linter-page-exists-message',
-			$( '<a>' ).prop( 'href', mw.util.getUrl( this.getValue() ) ).text( this.getValue() )
+			// $('<a>').prop('href', mw.util.getUrl(this.getValue())).text(this.getValue())
+			$('<a>').prop('href', wikipediaUrl).text(this.getValue())
 		),
 		messageInfo: {
-			title: mw.msg( 'cx-tools-linter-page-exists' ),
+			title: mw.msg('cx-tools-linter-page-exists'),
 			// FIXME: Point to the more informative page about overwriting content
 			help: 'https://www.mediawiki.org/wiki/Special:MyLanguage/Help:Editing_pages',
 			resolvable: true
@@ -108,9 +113,9 @@ mw.cx.ui.PageTitleWidget.prototype.getExistingTitleWarning = function () {
 mw.cx.ui.PageTitleWidget.prototype.getEmptyTitleError = function () {
 	return {
 		name: 'empty-title',
-		message: mw.message( 'cx-tools-linter-empty-title-message' ),
+		message: mw.message('cx-tools-linter-empty-title-message'),
 		messageInfo: {
-			title: mw.msg( 'cx-tools-linter-empty-title' ),
+			title: mw.msg('cx-tools-linter-empty-title'),
 			// FIXME: Link to localized help page
 			help: 'https://en.wikipedia.org/wiki/Wikipedia:Page_name',
 			type: 'error'
@@ -119,34 +124,34 @@ mw.cx.ui.PageTitleWidget.prototype.getEmptyTitleError = function () {
 };
 
 mw.cx.ui.PageTitleWidget.prototype.getInvalidCharacterError = function () {
-	const titleObj = mw.Title.newFromUserInput( this.getValue() ),
+	const titleObj = mw.Title.newFromUserInput(this.getValue()),
 		messageData = {
 			name: 'invalid-title',
-			message: mw.message( 'cx-tools-linter-invalid-character-message' ),
+			message: mw.message('cx-tools-linter-invalid-character-message'),
 			messageInfo: {
-				title: mw.msg( 'cx-tools-linter-invalid-character' ),
+				title: mw.msg('cx-tools-linter-invalid-character'),
 				// FIXME: Link to localized help page
 				help: 'https://en.wikipedia.org/wiki/Wikipedia:Page_name',
 				type: 'error'
 			}
 		};
 
-	if ( titleObj ) {
-		this.validTitle = titleObj.title.replace( /_/g, ' ' );
+	if (titleObj) {
+		this.validTitle = titleObj.title.replace(/_/g, ' ');
 
-		messageData.messageInfo = $.extend( messageData.messageInfo, {
+		messageData.messageInfo = $.extend(messageData.messageInfo, {
 			resolvable: true,
 			actionIcon: 'trash',
-			actionLabel: mw.msg( 'cx-tools-linter-invalid-character-action' ),
-			action: this.fixTitle.bind( this )
-		} );
+			actionLabel: mw.msg('cx-tools-linter-invalid-character-action'),
+			action: this.fixTitle.bind(this)
+		});
 	}
 
 	return messageData;
 };
 
 mw.cx.ui.PageTitleWidget.prototype.fixTitle = function () {
-	this.setValue( this.validTitle );
+	this.setValue(this.validTitle);
 };
 
 /**
@@ -157,9 +162,9 @@ mw.cx.ui.PageTitleWidget.prototype.fixTitle = function () {
  * @fires enter If enter key is pressed and input is not multiline
  * @return {boolean|undefined}
  */
-mw.cx.ui.PageTitleWidget.prototype.onKeyPress = function ( e ) {
-	if ( e.which === OO.ui.Keys.ENTER ) {
-		this.emit( 'enter', e );
+mw.cx.ui.PageTitleWidget.prototype.onKeyPress = function (e) {
+	if (e.which === OO.ui.Keys.ENTER) {
+		this.emit('enter', e);
 		return false;
 	}
 };

@@ -10,26 +10,26 @@
  * @param {jQuery} $sourceSection Source section
  * @param {jQuery} $targetSection Target section
  */
-mw.cx.alignSections = function ( $sourceSection, $targetSection ) {
+mw.cx.alignSections = function ($sourceSection, $targetSection) {
 	let steps = 0;
 
 	// Remove min-heights
-	$sourceSection.css( 'min-height', '' );
-	$targetSection.css( 'min-height', '' );
+	$sourceSection.css('min-height', '');
+	$targetSection.css('min-height', '');
 
-	let sourceHeight = +$sourceSection[ 0 ].scrollHeight;
-	let targetHeight = +$targetSection[ 0 ].scrollHeight;
+	let sourceHeight = +$sourceSection[0].scrollHeight;
+	let targetHeight = +$targetSection[0].scrollHeight;
 
-	while ( sourceHeight !== targetHeight ) {
-		if ( targetHeight > sourceHeight ) {
-			$sourceSection.css( 'min-height', targetHeight );
+	while (sourceHeight !== targetHeight) {
+		if (targetHeight > sourceHeight) {
+			$sourceSection.css('min-height', targetHeight);
 		} else {
-			$targetSection.css( 'min-height', sourceHeight );
+			$targetSection.css('min-height', sourceHeight);
 		}
-		sourceHeight = +$sourceSection[ 0 ].scrollHeight;
-		targetHeight = +$targetSection[ 0 ].scrollHeight;
-		if ( steps++ === 5 ) {
-			mw.track( 'Alignment attempt is not succeeding. Aborting.' );
+		sourceHeight = +$sourceSection[0].scrollHeight;
+		targetHeight = +$targetSection[0].scrollHeight;
+		if (steps++ === 5) {
+			mw.track('Alignment attempt is not succeeding. Aborting.');
 			break;
 		}
 	}
@@ -43,26 +43,36 @@ mw.cx.alignSections = function ( $sourceSection, $targetSection ) {
  * @param {number} newNamespaceId New namespace id
  * @return {string} New title with changed namespace
  */
-mw.cx.getTitleForNamespace = function ( currentTitle, newNamespaceId ) {
-	const currentTitleObj = new mw.Title( currentTitle );
+mw.cx.getTitleForNamespace = function (currentTitle, newNamespaceId) {
+	if (!currentTitle || typeof currentTitle !== 'string') {
+		return currentTitle;
+	}
+
+	let currentTitleObj;
+
+	try {
+		currentTitleObj = new mw.Title(currentTitle);
+	} catch (e) {
+		return currentTitle;
+	}
 	const currentNamespace = currentTitleObj.getNamespaceId();
-	if ( newNamespaceId === currentNamespace ) {
+	if (newNamespaceId === currentNamespace) {
 		// No change.
 		return currentTitle;
 	}
 
 	// Get the current title string
 	currentTitle = currentTitleObj.getMainText();
-	if ( currentNamespace === mw.config.get( 'wgNamespaceIds' ).user ) {
+	if (currentNamespace === mw.config.get('wgNamespaceIds').user) {
 		// User namespace. Get the title part alone after removing User:username/ part
-		currentTitle = currentTitle.slice( currentTitle.indexOf( '/' ) + 1 );
+		currentTitle = currentTitle.slice(currentTitle.indexOf('/') + 1);
 	}
 
-	if ( newNamespaceId === mw.config.get( 'wgNamespaceIds' ).user ) {
+	if (newNamespaceId === mw.config.get('wgNamespaceIds').user) {
 		const username = mw.user.getName();
-		currentTitle = mw.Title.newFromText( username + '/' + currentTitle, newNamespaceId ).toText();
+		currentTitle = mw.Title.newFromText(username + '/' + currentTitle, newNamespaceId).toText();
 	}
-	return mw.Title.newFromText( currentTitle, newNamespaceId ).toText();
+	return mw.Title.newFromText(currentTitle, newNamespaceId).toText();
 };
 
 /**
@@ -71,12 +81,12 @@ mw.cx.getTitleForNamespace = function ( currentTitle, newNamespaceId ) {
  * @return {number} Target namespace id
  */
 mw.cx.getDefaultTargetNamespace = function () {
-	const config = require( '../config.json' );
+	const config = require('../config.json');
 	let targetNamespace = config.TargetNamespace;
 
 	// Validate the configuration.
-	if ( !( targetNamespace in mw.config.get( 'wgFormattedNamespaces' ) ) ) {
-		mw.log.error( '[CX] Invalid publishing namespace configuration. Namespace does not exist: ' + targetNamespace );
+	if (!(targetNamespace in mw.config.get('wgFormattedNamespaces'))) {
+		mw.log.error('[CX] Invalid publishing namespace configuration. Namespace does not exist: ' + targetNamespace);
 		targetNamespace = 0;
 	}
 
@@ -90,13 +100,13 @@ mw.cx.getDefaultTargetNamespace = function () {
  * @param {string} sectionId Section id
  * @return {number} section number
  */
-mw.cx.getSectionNumberFromSectionId = function ( sectionId ) {
-	return Number( sectionId.match( /^cx(Target|Source)Section([0-9]+)$/ )[ 2 ] );
+mw.cx.getSectionNumberFromSectionId = function (sectionId) {
+	return Number(sectionId.match(/^cx(Target|Source)Section([0-9]+)$/)[2]);
 };
 
 mw.cx.getCXVersion = function () {
-	const config = require( '../config.json' );
-	return Number( config.Version );
+	const config = require('../config.json');
+	return Number(config.Version);
 };
 
 /**
@@ -106,13 +116,13 @@ mw.cx.getCXVersion = function () {
  * @param {ve.dm.LinearSelection} selection
  * @return {ve.dm.CXSectionNode}
  */
-mw.cx.getParentSectionForSelection = function ( surface, selection ) {
+mw.cx.getParentSectionForSelection = function (surface, selection) {
 	const documentModel = surface.getModel().getDocument();
-	let parentBranchNode = documentModel.getBranchNodeFromOffset( selection.getRange().start );
+	let parentBranchNode = documentModel.getBranchNodeFromOffset(selection.getRange().start);
 
 	let section;
-	while ( parentBranchNode ) {
-		if ( parentBranchNode.type === 'cxSection' ) {
+	while (parentBranchNode) {
+		if (parentBranchNode.type === 'cxSection') {
 			section = parentBranchNode;
 			break;
 		}
@@ -132,8 +142,8 @@ mw.cx.getLoginHref = function () {
 	// Remove the title from return-to query parameters, so duplication is avoided
 	delete currentUri.query.title;
 
-	return mw.util.getUrl( 'Special:UserLogin', {
+	return mw.util.getUrl('Special:UserLogin', {
 		returnto: 'Special:ContentTranslation',
 		returntoquery: currentUri.getQueryString()
-	} );
+	});
 };
