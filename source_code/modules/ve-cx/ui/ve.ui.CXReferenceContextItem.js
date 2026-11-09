@@ -1,4 +1,4 @@
-( function () {
+(function () {
 	'use strict';
 
 	/* Override for ve.ui.MWReferenceContextItem.prototype.getRendering as it creates
@@ -13,48 +13,48 @@
 	**/
 	ve.ui.MWReferenceContextItem.prototype.getRendering = function getReferenceRendering() {
 		const refNode = this.getReferenceNode();
-		if ( refNode ) {
-			this.view = new ve.ui.MWPreviewElement( refNode, {
+		if (refNode) {
+			this.view = new ve.ui.MWPreviewElement(refNode, {
 				useView: true
-			} );
+			});
 			// The $element property may be rendered into asynchronously, update the context's size when the
 			// rendering is complete if that's the case
-			this.view.once( 'render', this.context.updateDimensions.bind( this.context ) );
+			this.view.once('render', this.context.updateDimensions.bind(this.context));
 			return this.view.$element;
 		} else {
-			return $( '<div>' )
-				.addClass( 've-ui-mwReferenceContextItem-muted' )
-				.text( ve.msg( 'cite-ve-referenceslist-missingref' ) );
+			return $('<div>')
+				.addClass('ve-ui-mwReferenceContextItem-muted')
+				.text(ve.msg('cite-ve-referenceslist-missingref'));
 		}
 	};
 
-	function addCxSubclass( parentContextItem ) {
+	function addCxSubclass(parentContextItem) {
 		const contextItem = function CXGeneratedMWCitationContextItem() {
 			// Parent constructor
-			parentContextItem.apply( this, arguments );
+			parentContextItem.apply(this, arguments);
 		};
 
-		OO.inheritClass( contextItem, parentContextItem );
+		OO.inheritClass(contextItem, parentContextItem);
 
 		contextItem.prototype.getRendering = function () {
-			const cxData = this.model.getAttribute( 'cx' ) || {};
+			const cxData = this.model.getAttribute('cx') || {};
 
-			if ( cxData.adapted === false ) {
+			if (cxData.adapted === false) {
 				// Reference is not adapted. Use an empty div as content with the same
 				// CSS class that parent class uses for such empty content.
-				return $( '<div>' )
-					.addClass( 've-ui-mwReferenceContextItem-muted' );
+				return $('<div>')
+					.addClass('ve-ui-mwReferenceContextItem-muted');
 			}
-			return contextItem.super.prototype.getRendering.apply( this, arguments );
+			return contextItem.super.prototype.getRendering.apply(this, arguments);
 		};
 
-		ve.ui.contextItemFactory.register( contextItem );
+		ve.ui.contextItemFactory.register(contextItem);
 	}
 
-	ve.ui.mwCitationTools.forEach( function ( tool ) {
+	ve.ui.mwCitationTools.forEach(function (tool) {
 		const contextName = 'cite-' + tool.name;
-		const parentContextItem = ve.ui.contextItemFactory.lookup( contextName );
-		addCxSubclass( parentContextItem );
-	} );
+		const parentContextItem = ve.ui.contextItemFactory.lookup(contextName);
+		addCxSubclass(parentContextItem);
+	});
 
-}() );
+}());
